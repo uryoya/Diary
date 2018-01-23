@@ -1,8 +1,8 @@
-package com.urano
+package com.uryoya.diary
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response}
-import com.urano.entity.{HelloWorldRequest, HelloWorldResponse}
+import com.uryoya.diary.entity.{HelloWorldRequest, HelloWorldResponse}
 import io.circe.generic.auto._
 import io.finch.Endpoint
 import io.finch._
