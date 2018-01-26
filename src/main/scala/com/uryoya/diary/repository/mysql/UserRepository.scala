@@ -1,7 +1,6 @@
 package com.uryoya.diary.repository.mysql
 
 import doobie.implicits._
-import com.uryoya.diary.repository.mysql.MysqlTransactors
 import com.uryoya.diary.entity._
 import com.uryoya.diary.entity.mysql.User
 
