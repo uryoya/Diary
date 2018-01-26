@@ -66,9 +66,10 @@ object DiaryRepository {
     * 日報を更新する.
     */
   def updateDiary(diary: Diary): Int = {
+    val updateTime = java.sql.Timestamp.from(java.time.Instant.now)
     sql"""
       UPDATE `diaries`
-      SET `title` = ${diary.title}, `body` = ${diary.body}
+      SET `title` = ${diary.title}, `body` = ${diary.body}, `last_update_at` = $updateTime
       WHERE `id` = ${diary.id}
     """
       .update.run
