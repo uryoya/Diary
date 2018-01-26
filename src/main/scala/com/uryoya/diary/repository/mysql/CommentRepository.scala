@@ -31,8 +31,7 @@ object CommentRepository {
     """
       .query[Comment]
       .list
-      .transact(MysqlTransactors.master)
-      .unsafeRunSync
+      .transact(MysqlTransactors.master) .unsafeRunSync
   }
 
   /**
@@ -52,9 +51,10 @@ object CommentRepository {
     * コメントを更新する.
     */
   def updateComment(comment: Comment): Int = {
+    val updateTime = java.sql.Timestamp.from(java.time.Instant.now)
     sql"""
       UPDATE `comments`
-      SET `body` = ${comment.body}
+      SET `body` = ${comment.body}, `last_update_at` = $updateTime
       WHERE `id` = ${comment.id}
     """
       .update.run
