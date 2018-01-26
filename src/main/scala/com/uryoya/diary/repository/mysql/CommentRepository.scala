@@ -51,7 +51,7 @@ object CommentRepository {
   /**
     * コメントを更新する.
     */
-  def updateDiary(comment: Comment): Int = {
+  def updateComment(comment: Comment): Int = {
     sql"""
       UPDATE `comments`
       SET `body` = ${comment.body}
