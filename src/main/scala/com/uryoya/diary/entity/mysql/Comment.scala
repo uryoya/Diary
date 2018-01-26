@@ -9,5 +9,5 @@ case class Comment (
   diaryId: DiaryId,
   body: String,
   createAt: Timestamp,
-  updateAt: Timestamp,
+  lastUpdateAt: Timestamp,
 )

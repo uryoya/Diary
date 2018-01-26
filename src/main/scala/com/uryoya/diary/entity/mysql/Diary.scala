@@ -9,5 +9,5 @@ case class Diary (
   title: String,
   body: String,
   createAt: Timestamp,
-  updateAt: Timestamp,
+  lastUpdateAt: Timestamp,
 )

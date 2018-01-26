@@ -10,7 +10,7 @@ object CommentRepository {
     */
   def getComment(id: CommentId): Option[Comment] = {
     sql"""
-      SELECT `id`, `author_id`, `diary_id`, `body`, `create_at`, `update_at`
+      SELECT `id`, `author_id`, `diary_id`, `body`, `create_at`, `last_update_at`
       FROM `comments`
       WHERE `id` = $id
     """
@@ -25,7 +25,7 @@ object CommentRepository {
     */
   def getAllComment(diary: Diary): List[Comment] = {
     sql"""
-      SELECT `id`, `author_id`, `diary_id`, `body`, `create_at`, `update_at`
+      SELECT `id`, `author_id`, `diary_id`, `body`, `create_at`, `last_update_at`
       FROM `comments`
       WHERE `diary_id` = ${diary.id}
     """

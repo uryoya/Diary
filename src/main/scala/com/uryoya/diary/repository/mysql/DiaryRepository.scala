@@ -10,7 +10,7 @@ object DiaryRepository {
     */
   def getDiary(id: DiaryId): Option[Diary] = {
     sql"""
-      SELECT `id`, `author_id`, `title`, `body`, `create_at`, `update_at`
+      SELECT `id`, `author_id`, `title`, `body`, `create_at`, `last_update_at`
       FROM `diaries`
       WHERE `id` = $id
     """
@@ -25,7 +25,7 @@ object DiaryRepository {
     */
   def getAllDiary: List[Diary] = {
     sql"""
-      SELECT `id`, `author_id`, `title`, `body`, `create_at`, `update_at`
+      SELECT `id`, `author_id`, `title`, `body`, `create_at`, `last_update_at`
       FROM `diaries`
     """
       .query[Diary]
@@ -39,7 +39,7 @@ object DiaryRepository {
     */
   def getAllDiaryWrittenByUser(author: User): List[Diary] = {
     sql"""
-      SELECT `id`, `author_id`, `title`, `body`, `create_at`, `update_at`
+      SELECT `id`, `author_id`, `title`, `body`, `create_at`, `last_update_at`
       FROM `diaries`
       WHERE `author_id` = ${author.id}
     """
