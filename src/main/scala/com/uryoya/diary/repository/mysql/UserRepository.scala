@@ -8,7 +8,7 @@ object UserRepository {
   /**
     * User IDからUserを取得する.
     */
-  def get(id: UserId): Option[User] = {
+  def getUser(id: UserId): Option[User] = {
     sql"""
       SELECT `id`, `login`, `name`, `avatar_uri`, `access_token`, `admin`
       FROM `users`
@@ -23,7 +23,7 @@ object UserRepository {
   /**
     * login IDからUserを取得する.
     */
-  def get(login: String): Option[User] = {
+  def getUser(login: String): Option[User] = {
     sql"""
       SELECT `id`, `login`, `name`, `avatar_uri`, `access_token`, `admin`
       FROM `users`
@@ -38,7 +38,7 @@ object UserRepository {
   /**
     * すべてのユーザを取得する.
     */
-  def getAll: List[User] = {
+  def getAllUser: List[User] = {
     sql"""
       SELECT `id`, `login`, `name`, `avatar_uri`, `access_token`, `admin`
       FROM `users`
@@ -54,7 +54,7 @@ object UserRepository {
     *
     * TODO: ID重複などSQLでエラーが発生した場合、例外が創出されるので対策が必要
     */
-  def add(user: User): Int = {
+  def addUser(user: User): Int = {
     sql"""
       INSERT INTO `users` (`id`, `login`, `name`, `avatar_uri`, `access_token`, `admin`)
       VALUES (${user.id}, ${user.login}, ${user.name}, ${user.avatarUri}, ${user.accessToken}, ${user.admin})
@@ -69,7 +69,7 @@ object UserRepository {
     *
     * 更新できるのは login, name, avatar_uri, access_token のみ
     */
-  def update(user: User): Int = {
+  def updateUser(user: User): Int = {
     sql"""
       UPDATE `users`
       SET `login` = ${user.login}, `name` = ${user.name}, `avatar_uri` = ${user.avatarUri}, `access_token` = ${user.accessToken}
@@ -83,7 +83,7 @@ object UserRepository {
   /**
     * 権限を昇格させる.
     */
-  def promotion(user: User): Int = {
+  def promotionUser(user: User): Int = {
     sql"""
       UPDATE `users`
       SET `admin` = 1
@@ -97,7 +97,7 @@ object UserRepository {
   /**
     * 権限を降格させる.
     */
-  def demote(user: User): Int = {
+  def demoteUser(user: User): Int = {
     sql"""
       UPDATE `users`
       SET `admin` = 0
