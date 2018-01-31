@@ -1,0 +1,15 @@
+mysql {
+  host = "localhost"
+  port = 3306
+  user = ""
+  password = ""
+  db = "diary"
+}
+redis {
+  host = "localhost"
+  port = 6379
+}
+github {
+  client-id = ""
+  client-secret = ""
+}
