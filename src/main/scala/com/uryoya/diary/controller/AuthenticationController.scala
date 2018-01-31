@@ -7,7 +7,7 @@ import com.uryoya.diary.repository.mysql._
 import com.uryoya.diary.service.AuthenticationService
 
 object AuthenticationController {
-  def Signin(req: SigninRequest): Either[InvalidRequest, MessageResponse] = {
+  def signin(req: SigninRequest): Either[InvalidRequest, MessageResponse] = {
     UserRepository.getUser(req.login) match {
       case Some(user) => if (AuthenticationService.passwordVerify(req.password, user.passwordHash)) {
         Right(MessageResponse("Success."))

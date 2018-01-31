@@ -22,7 +22,7 @@ class Api {
 
     val signin: Endpoint[MessageResponse] =
       post("api" :: "signin" :: jsonBody[SigninRequest]) { req: SigninRequest =>
-        AuthenticationController.Signin(req) match {
+        AuthenticationController.signin(req) match {
           case Right(res) => Ok(res).withCookie(new Cookie("SESSION", "SESSIONID"))
           case Left(e) => BadRequest(new IllegalArgumentException(e.message))
         }
