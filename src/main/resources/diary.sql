@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS `users` (
   `id` INT NOT NULL,
   `login` VARCHAR(64) NOT NULL,         # GitHub login name
+  `password_hash` VARCHAR(64) NOT NULL,
   `name` VARCHAR(64) NOT NULL,          # Account name
   `avatar_uri` VARCHAR(128) NOT NULL,   # Avatar icon's uri (directory path or link)
   `access_token` VARCHAR(40) NOT NULL,  # GitHub OAuth access token

@@ -10,7 +10,7 @@ object UserRepository {
     */
   def getUser(id: UserId): Option[User] = {
     sql"""
-      SELECT `id`, `login`, `name`, `avatar_uri`, `access_token`, `admin`
+      SELECT `id`, `login`, `password_hash`, `name`, `avatar_uri`, `access_token`, `admin`
       FROM `users`
       WHERE `id` = $id
     """
@@ -25,7 +25,7 @@ object UserRepository {
     */
   def getUser(login: String): Option[User] = {
     sql"""
-      SELECT `id`, `login`, `name`, `avatar_uri`, `access_token`, `admin`
+      SELECT `id`, `login`, `password_hash`, `name`, `avatar_uri`, `access_token`, `admin`
       FROM `users`
       WHERE `login` = $login
     """
@@ -40,7 +40,7 @@ object UserRepository {
     */
   def getAllUser: List[User] = {
     sql"""
-      SELECT `id`, `login`, `name`, `avatar_uri`, `access_token`, `admin`
+      SELECT `id`, `login`, `password_hash`, `name`, `avatar_uri`, `access_token`, `admin`
       FROM `users`
     """
       .query[User]
@@ -56,8 +56,8 @@ object UserRepository {
     */
   def addUser(user: User): Int = {
     sql"""
-      INSERT INTO `users` (`id`, `login`, `name`, `avatar_uri`, `access_token`, `admin`)
-      VALUES (${user.id}, ${user.login}, ${user.name}, ${user.avatarUri}, ${user.accessToken}, ${user.admin})
+      INSERT INTO `users` (`id`, `login`, `password_hash`, `name`, `avatar_uri`, `access_token`, `admin`)
+      VALUES (${user.id}, ${user.login}, ${user.passwordHash}, ${user.name}, ${user.avatarUri}, ${user.accessToken}, ${user.admin})
     """
       .update.run
       .transact(MysqlTransactors.master)
@@ -72,7 +72,7 @@ object UserRepository {
   def updateUser(user: User): Int = {
     sql"""
       UPDATE `users`
-      SET `login` = ${user.login}, `name` = ${user.name}, `avatar_uri` = ${user.avatarUri}, `access_token` = ${user.accessToken}
+      SET `login` = ${user.login}, `password_hash` = ${user.passwordHash}, `name` = ${user.name}, `avatar_uri` = ${user.avatarUri}, `access_token` = ${user.accessToken}
       WHERE `id` = ${user.id}
     """
       .update.run
