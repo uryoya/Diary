@@ -22,3 +22,4 @@ project/plugins/project/
 
 ### Project Only ###
 /lib
+/src/main/resources/application.conf
