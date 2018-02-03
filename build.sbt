@@ -33,6 +33,7 @@ libraryDependencies ++= Seq(
   "eu.timepit"            %% "refined"              % refinedVersion,
   "eu.timepit"            %% "refined-pureconfig"   % refinedVersion,
   "com.twitter"           %% "util-app"             % twitterUtilVersion,
+  "com.twitter"           %% "finagle-redis"        % twitterUtilVersion,
   "io.catbird"            %% "catbird-util"         % twitterUtilVersion,
   "org.tpolecat"          %% "doobie-core"          % doobieVersion,
   "org.tpolecat"          %% "doobie-hikari"        % doobieVersion,
