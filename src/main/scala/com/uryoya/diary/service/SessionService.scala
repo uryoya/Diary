@@ -25,6 +25,7 @@ object SessionService {
   def newSession(key: String, value: String): SessionService = {
     val newId = generateSessionId
     Await.result(redis.hSet(newId, key, value))
+    Await.result(redis.expire(newId, config.session.maxAge))
     SessionService(newId, Map(key -> value))
   }
 
