@@ -1,9 +1,11 @@
 package com.uryoya.diary
 
 import java.security.AccessControlException
+import java.util.concurrent.TimeUnit
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Cookie, Request, Response}
+import com.twitter.util.Duration
 import com.uryoya.diary.controller.AuthenticationController
 import com.uryoya.diary.request.SigninRequest
 import com.uryoya.diary.response.MessageResponse
@@ -29,7 +31,11 @@ class Api {
     val signin: Endpoint[MessageResponse] =
       post("api" :: "signin" :: jsonBody[SigninRequest]) { req: SigninRequest =>
         AuthenticationController.signin(req) match {
-          case Right((res, session)) => Ok(res).withCookie(new Cookie(sessionKey, session.id))
+          case Right((res, session)) => {
+            val cookie = new Cookie(sessionKey, session.id)
+            cookie.maxAge = Duration(config.session.maxAge, TimeUnit.SECONDS)
+            Ok(res).withCookie(cookie)
+          }
           case Left(e) => BadRequest(new IllegalArgumentException(e.message))
         }
       }

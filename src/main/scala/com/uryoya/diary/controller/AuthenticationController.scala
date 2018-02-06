@@ -10,7 +10,7 @@ object AuthenticationController {
   def signin(req: SigninRequest): Either[InvalidRequest, (MessageResponse, SessionService)] = {
     UserRepository.getUser(req.login) match {
       case Some(user) => if (AuthenticationService.passwordVerify(req.password, user.passwordHash)) {
-        val session = SessionService.newSession("login", user.login)
+        val session = SessionService.newSession("login", user.login, user)
         Right(MessageResponse("Success."), session)
       } else {
         Left(InvalidRequest("Password can not verified."))
