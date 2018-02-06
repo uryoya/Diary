@@ -21,6 +21,6 @@ object AuthenticationController {
 
   def signout(session: SessionService): MessageResponse = {
     session.remove
-    MessageResponse("Success.") // ここにサーバ側のセッションIDを消す処理を書く
+    MessageResponse("Success.")
   }
 }
