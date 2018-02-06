@@ -29,4 +29,8 @@ class RedisClient(underlying: redis.Client) {
   def del(key: String): Future[java.lang.Long] = {
     underlying.dels(Seq(StringToBuf(key)))
   }
+
+  def expire(key: String, ttl: Long): Future[Boolean] = {
+    underlying.expire(key, ttl).map(_.booleanValue)
+  }
 }
