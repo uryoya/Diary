@@ -6,6 +6,7 @@ import com.twitter.finagle.http.Cookie
 import com.twitter.util.Await
 import com.uryoya.diary.config
 import com.uryoya.diary.entity.SessionId
+import com.uryoya.diary.entity.mysql.User
 import com.uryoya.diary.repository.redis.{Redis, RedisClient}
 
 case class SessionService(id: SessionId, data: Map[String, String]) {
@@ -22,8 +23,8 @@ object SessionService {
   private lazy val redis: RedisClient = Redis.newClient(config.redis)
   def COOKIE_NAME: SessionId = config.session.cookieName
 
-  def newSession(key: String, value: String): SessionService = {
-    val newId = generateSessionId
+  def newSession(key: String, value: String, user: User): SessionService = {
+    val newId = generateSessionId(user)
     Await.result(redis.hSet(newId, key, value))
     Await.result(redis.expire(newId, config.session.maxAge))
     SessionService(newId, Map(key -> value))
@@ -42,7 +43,12 @@ object SessionService {
     else Some(SessionService(cookie.value, value))
   }
 
-  private def generateSessionId: SessionId = {
-    "random session id"
+  def generateSessionId(user: User): SessionId = {
+    val sha256 = java.security.MessageDigest.getInstance("SHA-256")
+    val payload: String =
+      user.login +
+      java.time.OffsetDateTime.now.toString +
+      java.security.SecureRandom.getSeed(8).toString
+    sha256.digest(payload.getBytes).map("%02x".format(_)).mkString
   }
 }
