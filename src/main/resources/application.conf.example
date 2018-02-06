@@ -1,6 +1,6 @@
 session {
   cookieName = "SID"
-  maxAge = 604800
+  max-age = 604800
 }
 mysql {
   host = "localhost"
