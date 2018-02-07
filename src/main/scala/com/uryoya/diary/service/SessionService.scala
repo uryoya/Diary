@@ -3,7 +3,7 @@ package com.uryoya.diary.service
 import java.security.AccessControlException
 
 import com.twitter.finagle.http.Cookie
-import com.twitter.util.Await
+import com.twitter.util.{Await, Future}
 import com.uryoya.diary.config
 import com.uryoya.diary.entity.SessionId
 import com.uryoya.diary.entity.mysql.User
@@ -33,6 +33,14 @@ object SessionService {
   def removeSession(id: SessionId): Unit = {
     Await.ready(redis.del(id))
   }
+
+  /**
+    * generateSessionIdで生成される文字列と同じ形式になっているか？
+    *
+    * ハッシュ化しているので、ハッシュ化された文字列の条件でバリデーションする。
+    * （バイト列をHexで文字列化。長さはsha256を使っているので64文字で固定。）
+    */
+  def isTrueSession(id: SessionId): Boolean = id.matches("""^[0-9|a-f]{64}$""")
 
   /**
     * クッキーからセッションIDを取り出し、Redisと照合してセッション変数を取り出す。
