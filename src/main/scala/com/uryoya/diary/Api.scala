@@ -6,9 +6,9 @@ import java.util.concurrent.TimeUnit
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Cookie, Request, Response}
 import com.twitter.util.Duration
-import com.uryoya.diary.controller.AuthenticationController
+import com.uryoya.diary.controller.{AuthenticationController, UserDetailController}
 import com.uryoya.diary.request.SigninRequest
-import com.uryoya.diary.response.MessageResponse
+import com.uryoya.diary.response.{MessageResponse, UserDetailResponse}
 import com.uryoya.diary.service.SessionService
 import io.circe.generic.auto._
 import io.finch.Endpoint
@@ -18,12 +18,9 @@ import io.finch.circe._
 class Api {
   val service: Service[Request, Response] = {
     val sessionKey = config.session.cookieName
-    val requiredSession: Endpoint[Either[AccessControlException, SessionService]] = root.map { req =>
-      req.cookies.get(sessionKey) match {
-        case Some(cookie) => SessionService.getFromCookie(cookie) match {
-          case Some(session) => Right(session)
-          case None => Left(new AccessControlException(""))
-        }
+    val requiredSession: Endpoint[Either[AccessControlException, SessionService]] = root.mapAsync { req =>
+      SessionService.getFromCookie(req.cookies.get(sessionKey).getOrElse(new Cookie(sessionKey, ""))) map {
+        case Some(session) => Right(session)
         case None => Left(new AccessControlException(""))
       }
     }
