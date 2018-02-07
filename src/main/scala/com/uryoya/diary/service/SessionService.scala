@@ -45,10 +45,12 @@ object SessionService {
   /**
     * クッキーからセッションIDを取り出し、Redisと照合してセッション変数を取り出す。
     */
-  def getFromCookie(cookie: Cookie): Option[SessionService] = {
-    val value = Await.result(redis.hGetAll(cookie.value))
-    if (value.isEmpty) None
-    else Some(SessionService(cookie.value, value))
+  def getFromCookie(cookie: Cookie): Future[Option[SessionService]] = {
+    if (!isTrueSession(cookie.value)) return Future.None
+    redis.hGetAll(cookie.value).map { value =>
+      if (value.isEmpty) None
+      else Some(SessionService(cookie.value, value))
+    }
   }
 
   def generateSessionId(user: User): SessionId = {
