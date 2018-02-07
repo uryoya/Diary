@@ -25,14 +25,12 @@ object SessionService {
 
   def newSession(key: String, value: String, user: User): SessionService = {
     val newId = generateSessionId(user)
-    Await.result(redis.hSet(newId, key, value))
-    Await.result(redis.expire(newId, config.session.maxAge))
+    redis.hSet(newId, key, value)
+    redis.expire(newId, config.session.maxAge)
     SessionService(newId, Map(key -> value))
   }
 
-  def removeSession(id: SessionId): Unit = {
-    Await.ready(redis.del(id))
-  }
+  def removeSession(id: SessionId): Unit = redis.del(id)
 
   /**
     * generateSessionIdで生成される文字列と同じ形式になっているか？
