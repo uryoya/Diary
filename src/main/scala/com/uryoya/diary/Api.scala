@@ -46,6 +46,17 @@ class Api {
         }
       }
 
-    (signin :+: signout).toServiceAs[Application.Json]
+    val userDetail: Endpoint[UserDetailResponse] =
+      get("api" :: "user" :: requiredSession) { rs: Either[AccessControlException, SessionService] =>
+        rs match {
+          case Right(session) => UserDetailController.detail(session) match {
+            case Right(resp) => Ok(resp)
+            case Left(e) => Unauthorized(new IllegalArgumentException(e.message))
+          }
+          case Left(e) => Unauthorized(e)
+        }
+      }
+
+    (signin :+: signout :+: userDetail).toServiceAs[Application.Json]
   }
 }
