@@ -11,7 +11,7 @@ object MysqlTransactors {
   private def createTransactor(mc: MysqlConfig) = {
     Transactor.fromDriverManager[IO](
       "com.mysql.jdbc.Driver",
-      s"jdbc:mysql://${mc.host}:${mc.port}/${mc.db}",
+      s"jdbc:mysql://${mc.host}:${mc.port}/${mc.db}?useSSL=false&requireSSL=false",
       mc.user,
       mc.password,
     )
