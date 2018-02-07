@@ -1,7 +1,5 @@
 package com.uryoya.diary.service
 
-import java.security.AccessControlException
-
 import com.twitter.finagle.http.Cookie
 import com.twitter.util.{Await, Future}
 import com.uryoya.diary.config
