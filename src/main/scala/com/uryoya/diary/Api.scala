@@ -6,9 +6,9 @@ import java.util.concurrent.TimeUnit
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Cookie, Request, Response}
 import com.twitter.util.Duration
-import com.uryoya.diary.controller.{AuthenticationController, UserDetailController}
+import com.uryoya.diary.controller.{AuthenticationController, UserController}
 import com.uryoya.diary.request.SigninRequest
-import com.uryoya.diary.response.{MessageResponse, UserDetailResponse}
+import com.uryoya.diary.response.{MessageResponse, UserResponse}
 import com.uryoya.diary.service.SessionService
 import io.circe.generic.auto._
 import io.finch.Endpoint
@@ -46,10 +46,18 @@ class Api {
         }
       }
 
-    val userDetail: Endpoint[UserDetailResponse] =
+    val users: Endpoint[List[UserResponse]] =
+      get("api" :: "users" :: requiredSession) { rs: Either[AccessControlException, SessionService] =>
+        rs match {
+          case Right(_) => Ok(UserController.users)
+          case Left(e) => Unauthorized(e)
+        }
+      }
+
+    val user: Endpoint[UserResponse] =
       get("api" :: "user" :: requiredSession) { rs: Either[AccessControlException, SessionService] =>
         rs match {
-          case Right(session) => UserDetailController.detail(session) match {
+          case Right(session) => UserController.detail(session) match {
             case Right(resp) => Ok(resp)
             case Left(e) => Unauthorized(new IllegalArgumentException(e.message))
           }
@@ -57,6 +65,11 @@ class Api {
         }
       }
 
-    (signin :+: signout :+: userDetail).toServiceAs[Application.Json]
+    (
+      signin
+        :+: signout
+        :+: users
+        :+: user
+    ).toServiceAs[Application.Json]
   }
 }
