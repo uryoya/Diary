@@ -1,5 +1,3 @@
-const userDetail = document.querySelector('#user-detail');
-const submitButton = document.querySelector('#signin');
 function getUser() {
     fetch('/api/user', {
         credentials: 'include'
@@ -8,9 +6,7 @@ function getUser() {
         return resp.json()
     })
     .then(function(user) {
-        const u = document.createElement("div");
-        u.innerHTML = user["name"];
-        userDetail.appendChild(u);
+        console.log(user)
     });
 }
 
@@ -62,12 +58,7 @@ function signout() {
     });
 }
 
-submitButton.addEventListener("click", signin);
-
-document.querySelector("#foo").addEventListener("click", function() {
-    getUser();
-    console.log("clicked!");
-});
-
+document.querySelector('#signin')addEventListener("click", signin);
 document.querySelector('#signout').addEventListener('click', signout);
+document.querySelector("#foo").addEventListener("click", getUser);
 document.querySelector('#users').addEventListener('click', getAllUser);
