@@ -50,6 +50,25 @@ object UserRepository {
   }
 
   /**
+    * 既存のユーザか？
+    */
+  def exists(login: String): Boolean = {
+    val user = sql"""
+      SELECT `id`, `login`, `password_hash`, `name`, `avatar_uri`, `access_token`, `admin`
+      FROM `users`
+      WHERE `login` = ${login}
+    """
+      .query[User]
+      .option
+      .transact(MysqlTransactors.master)
+      .unsafeRunSync
+    user match {
+      case Some(_) => true
+      case None => false
+    }
+  }
+
+  /**
     * ユーザを追加する
     *
     * TODO: ID重複などSQLでエラーが発生した場合、例外が創出されるので対策が必要

@@ -8,9 +8,11 @@ import com.uryoya.diary.service.{AuthenticationService, SessionService}
 
 object UserController {
   def createUser(newUser: CreateUserRequest): Either[InvalidRequest, UserResponse] = {
+    if (!validateUserInfo(newUser) || UserRepository.exists(newUser.login))
+      return Left(InvalidRequest("Can not create user."))
     val passwordHash = AuthenticationService.passwordHash(newUser.password)
-    val id = UserRepository.addUser(newUser.login, passwordHash, newUser.name, "", newUser.accessToken, false)
-    UserRepository.getUser(id) match {
+    UserRepository.addUser(newUser.login, passwordHash, newUser.name, "", newUser.accessToken, false)
+    UserRepository.getUser(newUser.login) match {
       case Some(user) => Right(UserResponse(user.id, user.login, user.name, user.admin))
       case None => Left(InvalidRequest("Can not create user."))
     }
@@ -28,4 +30,7 @@ object UserController {
       case None => Left(InvalidRequest("User Not Found."))
     }
   }
+
+  def validateUserInfo(user: CreateUserRequest): Boolean =
+    user.login != "" && user.password != "" && user.name != ""
 }
