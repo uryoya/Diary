@@ -32,11 +32,12 @@ function signout() {
 }
 
 function createUser() {
+    const form = new FormData(document.querySelector('#create-user-form'));
     const data = {
-        "login": document.getElementById('form-create-user-login').value,
-        "name": document.getElementById('form-create-user-name').value,
-        "accessToken": document.getElementById('form-create-user-atoken').value,
-        "password": document.getElementById('form-create-user-password').value
+        "login": form.get('login'),
+        "name": form.get('name'),
+        "accessToken": form.get('access-token'),
+        "password": form.get('password'),
     };
     fetch('/api/users', {
         method: "POST",
@@ -53,7 +54,8 @@ function createUser() {
 }
 
 function getUser() {
-    const login_id = document.getElementById('form-login-id').value;
+    const form = new FormData(document.querySelector('#get-user-form'));
+    const login_id = form.get('login-id');
     fetch(`/api/users/${login_id}`, {
         credentials: 'include'
     })
@@ -75,8 +77,8 @@ function getAllUser() { fetch('/api/users', { credentials: 'include'
 }
 
 function updateUser() {
-    const login_id = document.getElementById('form-login-id').value;
     const form = new FormData(document.getElementById('update-user-form'));
+    const login_id = form.get('login-id');
     const data = {};
     if (form.get('name') !== '') data['name'] = form.get('name');
     if (form.get('access-token') !== '') data['access-token'] = form.get('access-token');
@@ -95,9 +97,9 @@ function updateUser() {
     })
 }
 
-document.querySelector('#signin').addEventListener("click", signin);
-document.querySelector('#signout').addEventListener('click', signout);
-document.querySelector('#create-user').addEventListener('click', createUser);
-document.querySelector("#get-user").addEventListener("click", getUser);
-document.querySelector('#get-users').addEventListener('click', getAllUser);
+document.querySelector('#signin-button').addEventListener('click', signin);
+document.querySelector('#signout-button').addEventListener('click', signout);
+document.querySelector('#create-user-button').addEventListener('click', createUser);
+document.querySelector('#get-user-button').addEventListener('click', getUser);
+document.querySelector('#get-users-button').addEventListener('click', getAllUser);
 document.querySelector('#update-user-button').addEventListener('click', updateUser);

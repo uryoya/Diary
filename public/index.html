@@ -11,31 +11,32 @@
 			<input name="login" type="text" placeholder="login id">
 			<input name="password" type="password" placeholder="password">
 		</form>
-		<button id="signin">signin</button>
+		<button id="signin-button">signin</button>
 	</li>
 	<li>
-		<button id="signout">signout</button>
+		<button id="signout-button">signout</button>
 	</li>
 	<li>
-		<form>
-			<input id="form-create-user-login" type="text" placeholder="login id">
-			<input id="form-create-user-name" type="text" placeholder="name">
-			<input id="form-create-user-atoken" type="text" placeholder="access token">
-			<input id="form-create-user-password" type="password" placeholder="password">
+		<form id="create-user-form">
+			<input name="login" type="text" placeholder="login id">
+			<input name="name" type="text" placeholder="name">
+			<input name="access-token" type="text" placeholder="access token">
+			<input name="password" type="password" placeholder="password">
 		</form>
-		<button id="create-user">create user</button>
+		<button id="create-user-button">create user</button>
 	</li>
 	<li>
-		<button id="get-users">get all user</button>
+		<button id="get-users-button">get all user</button>
 	</li>
 	<li>
-		<form>
-			<input id="form-login-id" type="text" placeholder="login id">
+		<form id="get-user-form">
+			<input name="login-id" type="text" placeholder="login id">
 		</form>
-		<button id="get-user">get user</button>
+		<button id="get-user-button">get user</button>
 	</li>
 	<li>
 		<form id="update-user-form">
+			<input name="login-id" type="text" placeholder="login id">
 			<input name="name" type="text" placeholder="name">
 			<input name="access-token" type="text" placeholder="access token">
 			<input name="password" type="password" placeholder="password">
