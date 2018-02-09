@@ -53,7 +53,8 @@ function createUser() {
 }
 
 function getUser() {
-    fetch('/api/user', {
+    const login_id = document.getElementById('form-login-id').value;
+    fetch(`/api/users/${login_id}`, {
         credentials: 'include'
     })
     .then(function(resp) {
