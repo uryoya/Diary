@@ -24,8 +24,8 @@ object UserController {
     }
   }
 
-  def detail(session: SessionService): Either[InvalidRequest, UserResponse] = {
-    UserRepository.getUser(session.get("login").getOrElse("")) match {
+  def user(loginId: String): Either[InvalidRequest, UserResponse] = {
+    UserRepository.getUser(loginId) match {
       case Some(user) => Right(UserResponse(user.id, user.login, user.name, user.admin))
       case None => Left(InvalidRequest("User Not Found."))
     }

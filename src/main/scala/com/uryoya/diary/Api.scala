@@ -65,11 +65,12 @@ class Api {
       }
 
     val user: Endpoint[UserResponse] =
-      get("api" :: "user" :: requiredSession) { rs: Either[AccessControlException, SessionService] =>
+      get("api" :: "users" :: path[String] :: requiredSession) {
+        (loginId: String, rs: Either[AccessControlException, SessionService]) =>
         rs match {
-          case Right(session) => UserController.detail(session) match {
+          case Right(_) => UserController.user(loginId) match {
             case Right(resp) => Ok(resp)
-            case Left(e) => Unauthorized(new IllegalArgumentException(e.message))
+            case Left(e) => NotFound(new IllegalArgumentException(e.message))
           }
           case Left(e) => Unauthorized(e)
         }
