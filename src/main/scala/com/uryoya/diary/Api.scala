@@ -7,7 +7,7 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Cookie, Request, Response}
 import com.twitter.util.Duration
 import com.uryoya.diary.controller.{AuthenticationController, UserController}
-import com.uryoya.diary.request.SigninRequest
+import com.uryoya.diary.request.{CreateUserRequest, SigninRequest}
 import com.uryoya.diary.response.{MessageResponse, UserResponse}
 import com.uryoya.diary.service.SessionService
 import io.circe.generic.auto._
@@ -25,6 +25,7 @@ class Api {
       }
     }
 
+    // Authentication
     val signin: Endpoint[MessageResponse] =
       post("api" :: "signin" :: jsonBody[SigninRequest]) { req: SigninRequest =>
         AuthenticationController.signin(req) match {
@@ -43,6 +44,15 @@ class Api {
           case Right(session) => Ok(AuthenticationController.signout(session))
             .withCookie(new Cookie(sessionKey, ""))
           case Left(e) => Unauthorized(e)
+        }
+      }
+
+    // User
+    val createUser: Endpoint[UserResponse] =
+      post("api" :: "users" :: jsonBody[CreateUserRequest]) { req: CreateUserRequest =>
+        UserController.createUser(req) match {
+          case Right(res) => Ok(res)
+          case Left(e) => BadRequest(new IllegalArgumentException(e.message))
         }
       }
 
@@ -68,6 +78,7 @@ class Api {
     (
       signin
         :+: signout
+        :+: createUser
         :+: users
         :+: user
     ).toServiceAs[Application.Json]
