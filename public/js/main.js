@@ -1,3 +1,57 @@
+function signin() {
+    const data = {
+        "login": "uryoya",
+        "password": "pass"
+    };
+    fetch('/api/signin', {
+        method: 'post',
+        credentials: 'include',
+        body: JSON.stringify(data)
+    })
+        .then(function(resp) {
+            if (resp.ok) {
+                console.log("OK");
+            } else {
+                console.log("BUUUUUU");
+                console.log(resp);
+            }
+        })
+        .then(function(user) {
+            console.log(user);
+        });
+}
+
+function signout() {
+    fetch('/api/signout', {
+        method: "POST",
+        credentials: 'include'
+    })
+    .then(function(resp) {
+        console.log(resp.status);
+    });
+}
+
+function createUser() {
+    const data = {
+        "login": document.getElementById('form-create-user-login').value,
+        "name": document.getElementById('form-create-user-name').value,
+        "accessToken": document.getElementById('form-create-user-atoken').value,
+        "password": document.getElementById('form-create-user-password').value
+    };
+    fetch('/api/users', {
+        method: "POST",
+        credentials: 'include',
+        body: JSON.stringify(data)
+    })
+    .then(function(resp) {
+        console.log(resp);
+        return resp.json();
+    })
+    .then(function(user) {
+        console.log(user);
+    });
+}
+
 function getUser() {
     fetch('/api/user', {
         credentials: 'include'
@@ -22,43 +76,8 @@ function getAllUser() {
     });
 }
 
-function signin() {
-    const data = {
-        "login": document.getElementById("form-login").value,
-        "password": document.getElementById("form-password").value
-    };
-    console.log(data);
-    fetch('/api/signin', {
-        method: "POST",
-        credentials: 'include',
-        body: JSON.stringify(data)
-    })
-    .then(function(resp) {
-        return resp.json();
-    })
-    .then(function(status) {
-        if (status["message"] === "Success.") {
-            console.log("login success.");
-        } else {
-            console.log("login failed.");
-        }
-    })
-}
-
-function signout() {
-    fetch('/api/signout', {
-        method: "POST",
-        credentials: 'include'
-    })
-    .then(function(resp) {
-        return resp.json();
-    })
-    .then(function(status) {
-        console.log(status["message"]);
-    });
-}
-
 document.querySelector('#signin').addEventListener("click", signin);
 document.querySelector('#signout').addEventListener('click', signout);
-document.querySelector("#foo").addEventListener("click", getUser);
-document.querySelector('#users').addEventListener('click', getAllUser);
+document.querySelector('#create-user').addEventListener('click', createUser);
+document.querySelector("#get-user").addEventListener("click", getUser);
+document.querySelector('#get-users').addEventListener('click', getAllUser);
