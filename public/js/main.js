@@ -14,6 +14,18 @@ function getUser() {
     });
 }
 
+function getAllUser() {
+    fetch('/api/users', {
+        credentials: 'include'
+    })
+    .then(function(resp) {
+        return resp.json()
+    })
+    .then(function(users) {
+        console.log(users);
+    });
+}
+
 function signin() {
     const data = {
         "login": document.getElementById("form-login").value,
@@ -58,3 +70,4 @@ document.querySelector("#foo").addEventListener("click", function() {
 });
 
 document.querySelector('#signout').addEventListener('click', signout);
+document.querySelector('#users').addEventListener('click', getAllUser);
