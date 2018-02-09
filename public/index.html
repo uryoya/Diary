@@ -8,8 +8,8 @@
 <ul>
 	<li>
 		<form id="signin-form">
-			<input id="form-login" type="text" placeholder="login id">
-			<input id="form-password" type="password" placeholder="password">
+			<input name="login" type="text" placeholder="login id">
+			<input name="password" type="password" placeholder="password">
 		</form>
 		<button id="signin">signin</button>
 	</li>
@@ -33,6 +33,14 @@
 			<input id="form-login-id" type="text" placeholder="login id">
 		</form>
 		<button id="get-user">get user</button>
+	</li>
+	<li>
+		<form id="update-user-form">
+			<input name="name" type="text" placeholder="name">
+			<input name="access-token" type="text" placeholder="access token">
+			<input name="password" type="password" placeholder="password">
+		</form>
+		<button id="update-user-button">update user</button>
 	</li>
 </ul>
 <script src="js/main.js"></script>
