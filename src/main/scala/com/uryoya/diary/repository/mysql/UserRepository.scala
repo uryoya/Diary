@@ -54,10 +54,10 @@ object UserRepository {
     *
     * TODO: ID重複などSQLでエラーが発生した場合、例外が創出されるので対策が必要
     */
-  def addUser(user: User): Int = {
+  def addUser(login: String, passwordHash: String, name: String, avatarUri: String, accessToken: String, admin: Boolean): Int = {
     sql"""
-      INSERT INTO `users` (`id`, `login`, `password_hash`, `name`, `avatar_uri`, `access_token`, `admin`)
-      VALUES (${user.id}, ${user.login}, ${user.passwordHash}, ${user.name}, ${user.avatarUri}, ${user.accessToken}, ${user.admin})
+      INSERT INTO `users` (`login`, `password_hash`, `name`, `avatar_uri`, `access_token`, `admin`)
+      VALUES (${login}, ${passwordHash}, ${name}, ${avatarUri}, ${accessToken}, ${admin})
     """
       .update.run
       .transact(MysqlTransactors.master)
