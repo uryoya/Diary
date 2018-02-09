@@ -58,7 +58,7 @@ function signout() {
     });
 }
 
-document.querySelector('#signin')addEventListener("click", signin);
+document.querySelector('#signin').addEventListener("click", signin);
 document.querySelector('#signout').addEventListener('click', signout);
 document.querySelector("#foo").addEventListener("click", getUser);
 document.querySelector('#users').addEventListener('click', getAllUser);
