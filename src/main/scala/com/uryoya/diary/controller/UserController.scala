@@ -1,8 +1,9 @@
 package com.uryoya.diary.controller
 
 import com.uryoya.diary.entity.InvalidRequest
+import com.uryoya.diary.entity.mysql.User
 import com.uryoya.diary.repository.mysql.UserRepository
-import com.uryoya.diary.request.CreateUserRequest
+import com.uryoya.diary.request.{CreateUserRequest, UserRequest}
 import com.uryoya.diary.response.UserResponse
 import com.uryoya.diary.service.{AuthenticationService, SessionService}
 
@@ -29,6 +30,25 @@ object UserController {
       case Some(user) => Right(UserResponse(user.id, user.login, user.name, user.admin))
       case None => Left(InvalidRequest("User Not Found."))
     }
+  }
+
+  def updateUser(loginId: String, user: UserRequest, session: SessionService): Either[InvalidRequest, UserResponse] = {
+    val signinUserId = session.get("login").getOrElse("")
+    UserRepository.getUser(loginId).map { oldUserInfo =>
+      if (oldUserInfo.admin || oldUserInfo.login == signinUserId) {
+        val newUserInfo = oldUserInfo.copy(
+          name = user.name.getOrElse(oldUserInfo.name),
+          accessToken = user.accessToken.getOrElse(oldUserInfo.accessToken),
+          passwordHash = user.password
+            .map(AuthenticationService.passwordHash)
+            .getOrElse(oldUserInfo.passwordHash)
+        )
+        UserRepository.updateUser(newUserInfo)
+        Right(UserResponse.fromUserEntity(newUserInfo))
+      } else {
+        Left(InvalidRequest("Permission denied."))
+      }
+    }.getOrElse(Left(InvalidRequest("Permission denied.")))
   }
 
   def validateUserInfo(user: CreateUserRequest): Boolean =

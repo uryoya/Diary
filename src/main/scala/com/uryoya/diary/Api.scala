@@ -7,7 +7,7 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Cookie, Request, Response}
 import com.twitter.util.Duration
 import com.uryoya.diary.controller.{AuthenticationController, UserController}
-import com.uryoya.diary.request.{CreateUserRequest, SigninRequest}
+import com.uryoya.diary.request.{CreateUserRequest, SigninRequest, UserRequest}
 import com.uryoya.diary.response.{MessageResponse, UserResponse}
 import com.uryoya.diary.service.SessionService
 import io.circe.generic.auto._
@@ -76,12 +76,25 @@ class Api {
         }
       }
 
+    val updateUser: Endpoint[UserResponse] =
+      put("api" :: "users" :: path[String] :: requiredSession :: jsonBody[UserRequest]) {
+        (loginId: String, rs: Either[AccessControlException, SessionService], user: UserRequest) =>
+          rs match {
+            case Right(session) => UserController.updateUser(loginId, user, session) match {
+              case Right(resp) => Ok(resp)
+              case Left(e) => Unauthorized(new AccessControlException(e.message))
+            }
+            case Left(e) => Unauthorized(e)
+          }
+      }
+
     (
       signin
         :+: signout
         :+: createUser
         :+: users
         :+: user
+        :+: updateUser
     ).toServiceAs[Application.Json]
   }
 }
