@@ -16,9 +16,10 @@ import io.finch._
 import io.finch.circe._
 
 class Api {
+  type EitherSession = Either[AccessControlException, SessionService]
   val service: Service[Request, Response] = {
     val sessionKey = config.session.cookieName
-    val requiredSession: Endpoint[Either[AccessControlException, SessionService]] = root.mapAsync { req =>
+    val requiredSession: Endpoint[EitherSession] = root.mapAsync { req =>
       SessionService.getFromCookie(req.cookies.get(sessionKey).getOrElse(new Cookie(sessionKey, ""))) map {
         case Some(session) => Right(session)
         case None => Left(new AccessControlException(""))
@@ -39,7 +40,7 @@ class Api {
       }
 
     val signout: Endpoint[MessageResponse] =
-      post("api" :: "signout" :: requiredSession) { rs: Either[AccessControlException, SessionService] =>
+      post("api" :: "signout" :: requiredSession) { rs: EitherSession =>
         rs match {
           case Right(session) => Ok(AuthenticationController.signout(session))
             .withCookie(new Cookie(sessionKey, ""))
@@ -57,7 +58,7 @@ class Api {
       }
 
     val users: Endpoint[List[UserResponse]] =
-      get("api" :: "users" :: requiredSession) { rs: Either[AccessControlException, SessionService] =>
+      get("api" :: "users" :: requiredSession) { rs: EitherSession =>
         rs match {
           case Right(_) => Ok(UserController.users)
           case Left(e) => Unauthorized(e)
@@ -66,7 +67,7 @@ class Api {
 
     val user: Endpoint[UserResponse] =
       get("api" :: "users" :: path[String] :: requiredSession) {
-        (loginId: String, rs: Either[AccessControlException, SessionService]) =>
+        (loginId: String, rs: EitherSession) =>
         rs match {
           case Right(_) => UserController.user(loginId) match {
             case Right(resp) => Ok(resp)
@@ -78,7 +79,7 @@ class Api {
 
     val updateUser: Endpoint[UserResponse] =
       put("api" :: "users" :: path[String] :: requiredSession :: jsonBody[UserRequest]) {
-        (loginId: String, rs: Either[AccessControlException, SessionService], user: UserRequest) =>
+        (loginId: String, rs: EitherSession, user: UserRequest) =>
           rs match {
             case Right(session) => UserController.updateUser(loginId, user, session) match {
               case Right(resp) => Ok(resp)
