@@ -5,7 +5,7 @@ import com.uryoya.diary.entity.mysql.User
 import com.uryoya.diary.repository.mysql.UserRepository
 import com.uryoya.diary.request.{CreateUserRequest, UserRequest}
 import com.uryoya.diary.response.UserResponse
-import com.uryoya.diary.service.{AuthenticationService, SessionService}
+import com.uryoya.diary.service.{AuthenticationService, AvatarService, SessionService}
 
 object UserController {
   def createUser(newUser: CreateUserRequest): Either[InvalidRequest, UserResponse] = {
@@ -43,6 +43,21 @@ object UserController {
             .map(AuthenticationService.passwordHash)
             .getOrElse(oldUserInfo.passwordHash)
         )
+        UserRepository.updateUser(newUserInfo)
+        Right(UserResponse.fromUserEntity(newUserInfo))
+      } else {
+        Left(InvalidRequest("Permission denied."))
+      }
+    }.getOrElse(Left(InvalidRequest("Permission denied.")))
+  }
+
+  def updateUserAvatar(loginId: String, image: Array[Byte], session: SessionService): Either[InvalidRequest, UserResponse] = {
+    val signinUserId = session.get("login").getOrElse("")
+    UserRepository.getUser(loginId).map { oldUserInfo =>
+      if (oldUserInfo.admin || oldUserInfo.login == signinUserId) {
+        val avatar = new AvatarService(image)
+        avatar.save
+        val newUserInfo = oldUserInfo.copy(avatarUri = "http://path/to/img.jpg")
         UserRepository.updateUser(newUserInfo)
         Right(UserResponse.fromUserEntity(newUserInfo))
       } else {

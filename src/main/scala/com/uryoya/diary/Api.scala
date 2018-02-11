@@ -87,6 +87,18 @@ class Api {
           }
       }
 
+    val updateUserAvatar: Endpoint[UserResponse] =
+      put("api" :: "users" :: path[String] :: "avatar" :: requiredSession :: binaryBody) {
+        (loginId: String, rs: EitherSession, img: Array[Byte]) =>
+          rs match {
+            case Right(session) => UserController.updateUserAvatar(loginId, img, session) match {
+              case Right(resp) => Ok(resp)
+              case Left(e) => Unauthorized(new AccessControlException(e.message))
+            }
+            case Left(e) => Unauthorized(e)
+          }
+      }
+
     (
       signin
         :+: signout
@@ -94,6 +106,7 @@ class Api {
         :+: users
         :+: user
         :+: updateUser
+        :+: updateUserAvatar
     ).toServiceAs[Application.Json]
   }
 }
