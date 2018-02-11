@@ -30,11 +30,9 @@ class Api {
     val signin: Endpoint[MessageResponse] =
       post("api" :: "signin" :: jsonBody[SigninRequest]) { req: SigninRequest =>
         AuthenticationController.signin(req) match {
-          case Right((res, session)) => {
-            val cookie = new Cookie(sessionKey, session.id)
-            cookie.maxAge = Duration(config.session.maxAge, TimeUnit.SECONDS)
-            Ok(res).withCookie(cookie)
-          }
+          case Right((resp, session)) => Ok(resp).withCookie(
+              new Cookie(sessionKey, session.id, maxAge=Some(Duration(config.session.maxAge, TimeUnit.SECONDS)))
+            )
           case Left(e) => BadRequest(new IllegalArgumentException(e.message))
         }
       }
