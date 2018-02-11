@@ -1,30 +1,42 @@
 package com.uryoya.diary.service
 
-import java.io.{FileOutputStream, FileWriter}
+import java.awt.image.{AreaAveragingScaleFilter, BufferedImage, FilteredImageSource}
+import java.awt.Toolkit
+import java.io.ByteArrayInputStream
+import javax.imageio.ImageIO
 
-import com.twitter.util.Future
-import com.twitter.io.Writer
 import com.uryoya.diary.config
 import com.uryoya.diary.util.Path
 
 final class AvatarService(image: Array[Byte]) {
+  lazy val edgeSize: Int = config.userAvatar.edgeSize
   lazy val fileName: String = genFilename
   lazy val serveUri: String = Path.join(config.userAvatar.serverRootPath, fileName)
   lazy val localUri: String = Path.join(config.userAvatar.localRootPath, fileName)
 
-  def save: Option[Unit] = {
+  def save: Either[Exception, Boolean] = {
     try {
-      val imgFile = new java.io.File(localUri)
-      val imgWriter = new FileOutputStream(imgFile)
-      imgWriter.write(image)
-      Some(Unit)
+      val srcBufImg = ImageIO.read(new ByteArrayInputStream(image))
+      val filter = new AreaAveragingScaleFilter(edgeSize, edgeSize)
+      val dstImg = Toolkit.getDefaultToolkit.createImage(
+        new FilteredImageSource(srcBufImg.getSource, filter)
+      )
+      val dstBufImg = new BufferedImage(
+        dstImg.getWidth(null),
+        dstImg.getHeight(null),
+        BufferedImage.TYPE_INT_RGB,
+      )
+      val g = dstBufImg.createGraphics()
+      g.drawImage(dstImg, 0, 0, null)
+      g.dispose()
+      Right(ImageIO.write(dstBufImg, "jpg", new java.io.File(localUri)))
     } catch {
-      case _:Exception => None
+      case e:Exception => Left(e)
     }
   }
 
-  def genFilename: String = {
+  private def genFilename: String = {
     val md5 = java.security.MessageDigest.getInstance("MD5")
-    md5.digest(image).mkString + ".png"
+    md5.digest(image).mkString + ".jpg"
   }
 }
