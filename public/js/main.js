@@ -101,10 +101,13 @@ function updateUserAvatar() {
     const form = new FormData(document.getElementById('update-user-avatar-form'));
     const login_id = form.get('login-id');
     const image = form.get('image');
+    const header = new Headers();
+    header.append("Content-Type", image.type);
     fetch(`/api/users/${login_id}/avatar`, {
         credentials: 'include',
         method: 'put',
-        body: image
+        body: image,
+        headers: header
     })
     .then(function(resp) {
         return resp.json();
