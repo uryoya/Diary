@@ -97,9 +97,27 @@ function updateUser() {
     })
 }
 
+function updateUserAvatar() {
+    const form = new FormData(document.getElementById('update-user-avatar-form'));
+    const login_id = form.get('login-id');
+    const image = form.get('image');
+    fetch(`/api/users/${login_id}/avatar`, {
+        credentials: 'include',
+        method: 'put',
+        body: image
+    })
+    .then(function(resp) {
+        return resp.json();
+    })
+    .then(function (user) {
+        console.log(user);
+    })
+}
+
 document.querySelector('#signin-button').addEventListener('click', signin);
 document.querySelector('#signout-button').addEventListener('click', signout);
 document.querySelector('#create-user-button').addEventListener('click', createUser);
 document.querySelector('#get-user-button').addEventListener('click', getUser);
 document.querySelector('#get-users-button').addEventListener('click', getAllUser);
 document.querySelector('#update-user-button').addEventListener('click', updateUser);
+document.querySelector('#update-user-avatar-button').addEventListener('click', updateUserAvatar);
