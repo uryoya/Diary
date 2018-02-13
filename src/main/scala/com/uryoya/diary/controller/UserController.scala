@@ -14,20 +14,18 @@ object UserController {
     val passwordHash = AuthenticationService.passwordHash(newUser.password)
     UserRepository.addUser(newUser.login, passwordHash, newUser.name, "", newUser.accessToken, false)
     UserRepository.getUser(newUser.login) match {
-      case Some(user) => Right(UserResponse(user.id, user.login, user.name, user.admin))
+      case Some(user) => Right(UserResponse.fromUserEntity(user))
       case None => Left(InvalidRequest("Can not create user."))
     }
   }
 
   def users: List[UserResponse] = {
-    UserRepository.getAllUser.map { user =>
-      UserResponse(user.id, user.login, user.name, user.admin)
-    }
+    UserRepository.getAllUser.map(UserResponse.fromUserEntity)
   }
 
   def user(loginId: String): Either[InvalidRequest, UserResponse] = {
     UserRepository.getUser(loginId) match {
-      case Some(user) => Right(UserResponse(user.id, user.login, user.name, user.admin))
+      case Some(user) => Right(UserResponse.fromUserEntity(user))
       case None => Left(InvalidRequest("User Not Found."))
     }
   }
