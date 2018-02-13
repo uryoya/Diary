@@ -17,8 +17,11 @@ CREATE TABLE IF NOT EXISTS `diaries` (
   `create_at` TIMESTAMP NOT NULL DEFAULT current_timestamp,
   `last_update_at` TIMESTAMP NOT NULL DEFAULT current_timestamp,
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`author_id`)
-    REFERENCES `users` (`id`)
+  CONSTRAINT diaries_author_id_fk
+    FOREIGN KEY (`author_id`)
+      REFERENCES `users` (`id`)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
 ) ENGINE = Innodb;
 
 CREATE TABLE IF NOT EXISTS `comments` (
@@ -29,10 +32,16 @@ CREATE TABLE IF NOT EXISTS `comments` (
   `create_at` TIMESTAMP NOT NULL DEFAULT current_timestamp,
   `last_update_at` TIMESTAMP NOT NULL DEFAULT current_timestamp,
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`author_id`)
-    REFERENCES `users` (`id`),
-  FOREIGN KEY (`diary_id`)
-    REFERENCES `diaries` (`id`)
+  CONSTRAINT comments_author_id_fk
+    FOREIGN KEY (`author_id`)
+      REFERENCES `users` (`id`)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
+  CONSTRAINT comments_diary_id_fk
+    FOREIGN KEY (`diary_id`)
+      REFERENCES `diaries` (`id`)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
 ) ENGINE = Innodb;
 
 CREATE TABLE IF NOT EXISTS `events` (
@@ -41,8 +50,14 @@ CREATE TABLE IF NOT EXISTS `events` (
   `diary_id` INT,                     # Nullable
   `comment_id` INT,                   # Nullable
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`diary_id`)
-    REFERENCES `diaries` (`id`),
-  FOREIGN KEY (`comment_id`)
-    REFERENCES `comments` (`id`)
+  CONSTRAINT events_diary_id_fk
+    FOREIGN KEY (`diary_id`)
+      REFERENCES `diaries` (`id`)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
+  CONSTRAINT events_comment_id_fk
+    FOREIGN KEY (`comment_id`)
+      REFERENCES `comments` (`id`)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
 ) ENGINE = Innodb;
