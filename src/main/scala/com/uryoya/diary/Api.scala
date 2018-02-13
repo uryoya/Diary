@@ -24,6 +24,8 @@ class Api {
     val cookieMaxAge = Some(Duration(config.session.maxAge, TimeUnit.SECONDS))
     val sessionAsCookie = (session: SessionService) =>
       new Cookie(sessionKey, session.id, maxAge = cookieMaxAge)
+    val sessionRevokeAsCookie = // Cookieは Max-Age を`0`に設定すると削除される
+      new Cookie(sessionKey, "", maxAge = Some(Duration(0, TimeUnit.SECONDS)))
 
     val auth: Endpoint[HNil] =
       cookie(sessionKey).mapOutputAsync( _cookie =>
@@ -70,7 +72,7 @@ class Api {
     val signout: Endpoint[MessageResponse] =
       post("api" :: "signout" :: authWithSession) { session: SessionService =>
         Ok(AuthenticationController.signout(session))
-          .withCookie(new Cookie(sessionKey, ""))
+          .withCookie(sessionRevokeAsCookie)
       }
 
     // User
