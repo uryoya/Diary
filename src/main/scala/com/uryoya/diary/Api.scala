@@ -7,6 +7,8 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Cookie, Request, Response}
 import com.twitter.util.Duration
 import com.uryoya.diary.controller.{AuthenticationController, UserController}
+import com.uryoya.diary.entity.mysql.User
+import com.uryoya.diary.repository.mysql.UserRepository
 import com.uryoya.diary.request.{CreateUserRequest, SigninRequest, UserRequest}
 import com.uryoya.diary.response.{MessageResponse, UserResponse}
 import com.uryoya.diary.service.SessionService
@@ -16,34 +18,50 @@ import io.finch._
 import io.finch.circe._
 
 class Api {
-  type EitherSession = Either[AccessControlException, SessionService]
   val service: Service[Request, Response] = {
     val sessionKey = config.session.cookieName
-    val requiredSession: Endpoint[EitherSession] = root.mapAsync { req =>
-      SessionService.getFromCookie(req.cookies.get(sessionKey).getOrElse(new Cookie(sessionKey, ""))) map {
-        case Some(session) => Right(session)
-        case None => Left(new AccessControlException(""))
+    val cookieMaxAge = Some(Duration(config.session.maxAge, TimeUnit.SECONDS))
+    val sessionAsCookie = (session: SessionService) =>
+      new Cookie(sessionKey, session.id, maxAge = cookieMaxAge)
+
+    val auth: Endpoint[User] =
+      cookie(sessionKey).mapOutputAsync( _cookie =>
+        SessionService.getFromCookie(_cookie) map { maybeSessionService =>
+          val maybeOutput =
+            for {
+              session <- maybeSessionService
+              loginId <- session.get("login")
+              signinUser <- UserRepository.getUser(loginId)
+            } yield Ok(signinUser)
+          maybeOutput.getOrElse(Unauthorized(new Exception("Unknown user.")))
+        }
+      ).handle {
+        case e: Error.NotPresent => Unauthorized(e)
       }
-    }
+
+    val authWithSession: Endpoint[SessionService] =
+      cookie(sessionKey).mapOutputAsync( _cookie =>
+        SessionService.getFromCookie(_cookie)
+          .map(_.fold(Unauthorized(new Exception("Unknown user.")): Output[SessionService])(Ok))
+      ).handle {
+        case e: Error.NotPresent => Unauthorized(e)
+      }
 
     // Authentication
     val signin: Endpoint[MessageResponse] =
       post("api" :: "signin" :: jsonBody[SigninRequest]) { req: SigninRequest =>
         AuthenticationController.signin(req) match {
-          case Right((resp, session)) => Ok(resp).withCookie(
-              new Cookie(sessionKey, session.id, maxAge=Some(Duration(config.session.maxAge, TimeUnit.SECONDS)))
-            )
-          case Left(e) => BadRequest(new IllegalArgumentException(e.message))
+          case Right((resp, user)) =>
+            val session = SessionService.newSession("login", user.login, user)
+            Ok(resp)
+              .withCookie(sessionAsCookie(session)) case Left(e) => BadRequest(new IllegalArgumentException(e.message))
         }
       }
 
     val signout: Endpoint[MessageResponse] =
-      post("api" :: "signout" :: requiredSession) { rs: EitherSession =>
-        rs match {
-          case Right(session) => Ok(AuthenticationController.signout(session))
-            .withCookie(new Cookie(sessionKey, ""))
-          case Left(e) => Unauthorized(e)
-        }
+      post("api" :: "signout" :: authWithSession) { session: SessionService =>
+        Ok(AuthenticationController.signout(session))
+          .withCookie(new Cookie(sessionKey, ""))
       }
 
     // User
@@ -56,46 +74,34 @@ class Api {
       }
 
     val users: Endpoint[List[UserResponse]] =
-      get("api" :: "users" :: requiredSession) { rs: EitherSession =>
-        rs match {
-          case Right(_) => Ok(UserController.users)
-          case Left(e) => Unauthorized(e)
-        }
+      get("api" :: "users" :: auth) { _: User =>
+        Ok(UserController.users)
       }
 
     val user: Endpoint[UserResponse] =
-      get("api" :: "users" :: path[String] :: requiredSession) {
-        (loginId: String, rs: EitherSession) =>
-        rs match {
-          case Right(_) => UserController.user(loginId) match {
+      get("api" :: "users" :: path[String] :: auth) {
+        (loginId: String, _: User) =>
+          UserController.user(loginId) match {
             case Right(resp) => Ok(resp)
             case Left(e) => NotFound(new IllegalArgumentException(e.message))
           }
-          case Left(e) => Unauthorized(e)
-        }
       }
 
     val updateUser: Endpoint[UserResponse] =
-      put("api" :: "users" :: path[String] :: requiredSession :: jsonBody[UserRequest]) {
-        (loginId: String, rs: EitherSession, user: UserRequest) =>
-          rs match {
-            case Right(session) => UserController.updateUser(loginId, user, session) match {
-              case Right(resp) => Ok(resp)
-              case Left(e) => Unauthorized(new AccessControlException(e.message))
-            }
-            case Left(e) => Unauthorized(e)
+      put("api" :: "users" :: path[String] :: jsonBody[UserRequest] :: auth) {
+        (loginId: String, userReq: UserRequest, signinUser: User) =>
+          UserController.updateUser(loginId, userReq, signinUser) match {
+            case Right(resp) => Ok(resp)
+            case Left(e) => Forbidden(new AccessControlException(e.message))
           }
       }
 
     val updateUserAvatar: Endpoint[UserResponse] =
-      put("api" :: "users" :: path[String] :: "avatar" :: requiredSession :: binaryBody) {
-        (loginId: String, rs: EitherSession, img: Array[Byte]) =>
-          rs match {
-            case Right(session) => UserController.updateUserAvatar(loginId, img, session) match {
-              case Right(resp) => Ok(resp)
-              case Left(e) => Unauthorized(new AccessControlException(e.message))
-            }
-            case Left(e) => Unauthorized(e)
+      put("api" :: "users" :: path[String] :: "avatar" :: binaryBody :: auth) {
+        (loginId: String, img: Array[Byte], signinUser: User) =>
+          UserController.updateUserAvatar(loginId, img, signinUser) match {
+            case Right(resp) => Ok(resp)
+            case Left(e) => Forbidden(new AccessControlException(e.message))
           }
       }
 

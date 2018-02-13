@@ -30,41 +30,35 @@ object UserController {
     }
   }
 
-  def updateUser(loginId: String, user: UserRequest, session: SessionService): Either[InvalidRequest, UserResponse] = {
-    val signinUserId = session.get("login").getOrElse("")
-    UserRepository.getUser(loginId).map { oldUserInfo =>
-      if (oldUserInfo.admin || oldUserInfo.login == signinUserId) {
-        val newUserInfo = oldUserInfo.copy(
-          name = user.name.getOrElse(oldUserInfo.name),
-          accessToken = user.accessToken.getOrElse(oldUserInfo.accessToken),
-          passwordHash = user.password
-            .map(AuthenticationService.passwordHash)
-            .getOrElse(oldUserInfo.passwordHash)
-        )
-        UserRepository.updateUser(newUserInfo)
-        Right(UserResponse.fromUserEntity(newUserInfo))
-      } else {
-        Left(InvalidRequest("Permission denied."))
-      }
-    }.getOrElse(Left(InvalidRequest("Permission denied.")))
+  def updateUser(loginId: String, user: UserRequest, signinUser: User): Either[InvalidRequest, UserResponse] = {
+    if (signinUser.admin || signinUser.login == loginId) {
+      val newUserInfo = signinUser.copy(
+        name = user.name.getOrElse(signinUser.name),
+        accessToken = user.accessToken.getOrElse(signinUser.accessToken),
+        passwordHash = user.password
+          .map(AuthenticationService.passwordHash)
+          .getOrElse(signinUser.passwordHash)
+      )
+      UserRepository.updateUser(newUserInfo)
+      Right(UserResponse.fromUserEntity(newUserInfo))
+    } else {
+      Left(InvalidRequest("Permission denied."))
+    }
   }
 
-  def updateUserAvatar(loginId: String, image: Array[Byte], session: SessionService): Either[InvalidRequest, UserResponse] = {
-    val signinUserId = session.get("login").getOrElse("")
-    UserRepository.getUser(loginId).map { oldUserInfo =>
-      if (oldUserInfo.admin || oldUserInfo.login == signinUserId) {
-        val avatar = new AvatarService(oldUserInfo, image)
-        avatar.save match {
-          case Right(_) =>
-            val newUserInfo = oldUserInfo.copy(avatarUri = avatar.serveUri)
-            UserRepository.updateUser(newUserInfo)
-            Right(UserResponse.fromUserEntity(newUserInfo))
-          case Left(_) => Left(InvalidRequest(""))
-        }
-      } else {
-        Left(InvalidRequest("Permission denied."))
+  def updateUserAvatar(loginId: String, image: Array[Byte], signinUser: User): Either[InvalidRequest, UserResponse] = {
+    if (signinUser.admin || signinUser.login == loginId) {
+      val avatar = new AvatarService(signinUser, image)
+      avatar.save match {
+        case Right(_) =>
+          val newUserInfo = signinUser.copy(avatarUri = avatar.serveUri)
+          UserRepository.updateUser(newUserInfo)
+          Right(UserResponse.fromUserEntity(newUserInfo))
+        case Left(_) => Left(InvalidRequest(""))
       }
-    }.getOrElse(Left(InvalidRequest("Permission denied.")))
+    } else {
+      Left(InvalidRequest("Permission denied."))
+    }
   }
 
   def validateUserInfo(user: CreateUserRequest): Boolean =
