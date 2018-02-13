@@ -16,6 +16,7 @@ import io.circe.generic.auto._
 import io.finch.Endpoint
 import io.finch._
 import io.finch.circe._
+import shapeless.HNil
 
 class Api {
   val service: Service[Request, Response] = {
@@ -24,7 +25,15 @@ class Api {
     val sessionAsCookie = (session: SessionService) =>
       new Cookie(sessionKey, session.id, maxAge = cookieMaxAge)
 
-    val auth: Endpoint[User] =
+    val auth: Endpoint[HNil] =
+      cookie(sessionKey).mapOutputAsync( _cookie =>
+        SessionService.getFromCookie(_cookie)
+          .map(_.fold(Unauthorized(new Exception("Unknown user.")): Output[HNil])(_ => Ok(HNil)))
+      ).handle {
+        case e: Error.NotPresent => Unauthorized(e)
+      }
+
+    val authWithUser: Endpoint[User] =
       cookie(sessionKey).mapOutputAsync( _cookie =>
         SessionService.getFromCookie(_cookie) map { maybeSessionService =>
           val maybeOutput =
@@ -74,13 +83,12 @@ class Api {
       }
 
     val users: Endpoint[List[UserResponse]] =
-      get("api" :: "users" :: auth) { _: User =>
+      get("api" :: "users" :: auth) {
         Ok(UserController.users)
       }
 
     val user: Endpoint[UserResponse] =
-      get("api" :: "users" :: path[String] :: auth) {
-        (loginId: String, _: User) =>
+      get("api" :: "users" :: path[String] :: auth) { loginId: String =>
           UserController.user(loginId) match {
             case Right(resp) => Ok(resp)
             case Left(e) => NotFound(new IllegalArgumentException(e.message))
@@ -88,7 +96,7 @@ class Api {
       }
 
     val updateUser: Endpoint[UserResponse] =
-      put("api" :: "users" :: path[String] :: jsonBody[UserRequest] :: auth) {
+      put("api" :: "users" :: path[String] :: jsonBody[UserRequest] :: authWithUser) {
         (loginId: String, userReq: UserRequest, signinUser: User) =>
           UserController.updateUser(loginId, userReq, signinUser) match {
             case Right(resp) => Ok(resp)
@@ -97,7 +105,7 @@ class Api {
       }
 
     val updateUserAvatar: Endpoint[UserResponse] =
-      put("api" :: "users" :: path[String] :: "avatar" :: binaryBody :: auth) {
+      put("api" :: "users" :: path[String] :: "avatar" :: binaryBody :: authWithUser) {
         (loginId: String, img: Array[Byte], signinUser: User) =>
           UserController.updateUserAvatar(loginId, img, signinUser) match {
             case Right(resp) => Ok(resp)
