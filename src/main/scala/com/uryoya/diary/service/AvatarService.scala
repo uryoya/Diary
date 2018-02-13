@@ -6,9 +6,10 @@ import java.io.ByteArrayInputStream
 import javax.imageio.ImageIO
 
 import com.uryoya.diary.config
+import com.uryoya.diary.entity.mysql.User
 import com.uryoya.diary.util.Path
 
-final class AvatarService(image: Array[Byte]) {
+final class AvatarService(user: User, image: Array[Byte]) {
   lazy val edgeSize: Int = config.userAvatar.edgeSize
   lazy val fileName: String = genFilename
   lazy val serveUri: String = Path.join(config.userAvatar.serverRootPath, fileName)
@@ -36,7 +37,6 @@ final class AvatarService(image: Array[Byte]) {
   }
 
   private def genFilename: String = {
-    val md5 = java.security.MessageDigest.getInstance("MD5")
-    md5.digest(image).mkString + ".jpg"
+    s"${user.login}_avatar.${config.userAvatar.format}"
   }
 }

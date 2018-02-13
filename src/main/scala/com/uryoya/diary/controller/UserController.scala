@@ -53,15 +53,13 @@ object UserController {
     val signinUserId = session.get("login").getOrElse("")
     UserRepository.getUser(loginId).map { oldUserInfo =>
       if (oldUserInfo.admin || oldUserInfo.login == signinUserId) {
-        val newUserInfo = oldUserInfo.copy(avatarUri = "http://path/to/img.jpg")
-        UserRepository.updateUser(newUserInfo)
-        val avatar = new AvatarService(image)
+        val avatar = new AvatarService(oldUserInfo, image)
         avatar.save match {
-          case Right(_) => Right(UserResponse.fromUserEntity(newUserInfo))
-          case Left(e) => {
-            println(e)
-            Left(InvalidRequest(""))
-          }
+          case Right(_) =>
+            val newUserInfo = oldUserInfo.copy(avatarUri = avatar.serveUri)
+            UserRepository.updateUser(newUserInfo)
+            Right(UserResponse.fromUserEntity(newUserInfo))
+          case Left(_) => Left(InvalidRequest(""))
         }
       } else {
         Left(InvalidRequest("Permission denied."))
