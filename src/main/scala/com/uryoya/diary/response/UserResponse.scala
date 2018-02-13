@@ -7,10 +7,11 @@ final case class UserResponse(
   id: UserId,
   login: String,
   name: String,
+  avatarUri: String,
   admin: Boolean,
 )
 
 object UserResponse {
   def fromUserEntity(user: User): UserResponse =
-    UserResponse(user.id, user.login, user.name, user.admin)
+    UserResponse(user.id, user.login, user.name, user.avatarUri, user.admin)
 }
