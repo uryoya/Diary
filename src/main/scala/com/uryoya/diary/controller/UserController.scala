@@ -31,6 +31,9 @@ object UserController {
     }
   }
 
+  def myself(signinUser: User): UserResponse =
+    UserResponse.fromUserEntity(signinUser)
+
   def updateMyself(dstUserReq: UserRequest, signinUser: User): Either[InvalidRequest, MessageResponse] = {
     val newUserInfo = signinUser.copy(
       name = dstUserReq.name.getOrElse(signinUser.name),

@@ -106,6 +106,11 @@ class Api {
           }
       }
 
+    val myself: Endpoint[UserResponse] =
+      get("api" :: "myself" :: authWithUser) { signinUser: User =>
+        Ok(UserController.myself(signinUser))
+      }
+
     val updateMyself: Endpoint[MessageResponse] =
       put("api" :: "myself" :: jsonBody[UserRequest] :: authWithUser) { (userReq: UserRequest, signinUser: User) =>
         UserController.updateMyself(userReq, signinUser) match {
@@ -214,6 +219,7 @@ class Api {
         :+: createUser
         :+: users
         :+: user
+        :+: myself
         :+: updateMyself
         :+: updateMyselfAvatar
         :+: deleteUser
