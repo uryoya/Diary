@@ -210,6 +210,21 @@ function updateDiary() {
         })
 }
 
+function deleteDiary() {
+    const form = new FormData(document.querySelector('#delete-diary-form'));
+    const diary_id = form.get('diary-id');
+    fetch(`/api/diaries/${diary_id}`, {
+        credentials: 'include',
+        method: 'delete'
+    })
+        .then(function(resp) {
+            return resp.json()
+        })
+        .then(function(diary) {
+            console.log(diary)
+        });
+}
+
 document.querySelector('#signin-button').addEventListener('click', signin);
 document.querySelector('#signout-button').addEventListener('click', signout);
 document.querySelector('#create-user-button').addEventListener('click', createUser);
@@ -222,4 +237,5 @@ document.querySelector('#post-diary-button').addEventListener('click', postDiary
 document.querySelector('#get-diaries-button').addEventListener('click', getAlldiary);
 document.querySelector('#get-diary-button').addEventListener('click', getDiary);
 document.querySelector('#update-diary-button').addEventListener('click', updateDiary);
+document.querySelector('#delete-diary-button').addEventListener('click', deleteDiary);
 
