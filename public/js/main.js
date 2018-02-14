@@ -1,3 +1,15 @@
+function prevUserInfo() {
+    fetch(`/api/user}`, {
+        credentials: 'include'
+    })
+        .then(function(resp) {
+            return resp.json()
+        })
+        .then(function(user) {
+            console.log(user)
+        });
+}
+
 function signin() {
     const form = new FormData(document.querySelector('#signin-form'));
     const data = {
@@ -117,6 +129,21 @@ function updateUserAvatar() {
     })
 }
 
+function deleteUser() {
+    const form = new FormData(document.querySelector('#delete-user-form'));
+    const login_id = form.get('login-id');
+    fetch(`/api/users/${login_id}`, {
+        credentials: 'include',
+        method: 'delete'
+    })
+        .then(function(resp) {
+            return resp.json()
+        })
+        .then(function(user) {
+            console.log(user)
+        });
+}
+
 document.querySelector('#signin-button').addEventListener('click', signin);
 document.querySelector('#signout-button').addEventListener('click', signout);
 document.querySelector('#create-user-button').addEventListener('click', createUser);
@@ -124,3 +151,4 @@ document.querySelector('#get-user-button').addEventListener('click', getUser);
 document.querySelector('#get-users-button').addEventListener('click', getAllUser);
 document.querySelector('#update-user-button').addEventListener('click', updateUser);
 document.querySelector('#update-user-avatar-button').addEventListener('click', updateUserAvatar);
+document.querySelector('#delete-user-button').addEventListener('click', deleteUser);
