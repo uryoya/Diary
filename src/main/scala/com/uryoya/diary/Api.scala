@@ -195,7 +195,6 @@ class Api {
     val updateComment: Endpoint[MessageResponse] =
       put("api" :: "comments" :: path[Int] :: jsonBody[CommentRequest] :: authWithUser) {
         (commentId: CommentId, req: CommentRequest, signinUser: User) =>
-          println(signinUser)
           CommentController.updateComment(commentId, req, signinUser) match {
             case Right(resp) => Ok(resp)
             case Left(e) => Forbidden(new AccessControlException(e.message))
