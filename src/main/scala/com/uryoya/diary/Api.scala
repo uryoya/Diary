@@ -174,6 +174,16 @@ class Api {
           }
       }
 
+    // Comment
+    val postComment: Endpoint[MessageResponse] =
+      post("api" :: "comments" :: jsonBody[PostCommentRequest] :: authWithUser) {
+        (req: PostCommentRequest, signinUser: User) =>
+          CommentController.postComment(req, signinUser) match {
+            case Right(resp) => Ok(resp)
+            case Left(e) => BadRequest(new IllegalArgumentException(e.message))
+          }
+      }
+
     (
       signin
         :+: signout
@@ -188,6 +198,7 @@ class Api {
         :+: diary
         :+: updateDiary
         :+: deleteDiary
+        :+: postComment
     ).toServiceAs[Application.Json]
   }
 }
