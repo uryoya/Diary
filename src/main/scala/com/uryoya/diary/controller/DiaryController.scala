@@ -1,6 +1,6 @@
 package com.uryoya.diary.controller
 
-import com.uryoya.diary.entity.InvalidRequest
+import com.uryoya.diary.entity.{DiaryId, InvalidRequest}
 import com.uryoya.diary.entity.mysql.User
 import com.uryoya.diary.repository.mysql.DiaryRepository
 import com.uryoya.diary.request.DiaryRequest
@@ -16,6 +16,11 @@ object DiaryController {
 
   def diaries: List[DiaryResponse] =
     DiaryRepository.getAllDiary map {
+      case (diary, author) => DiaryResponse.fromDiaryEntity(diary, author)
+    }
+
+  def diary(diaryId: DiaryId): Option[DiaryResponse] =
+    DiaryRepository.getDiary(diaryId) map {
       case (diary, author) => DiaryResponse.fromDiaryEntity(diary, author)
     }
 }

@@ -7,13 +7,14 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Cookie, Request, Response}
 import com.twitter.util.Duration
 import com.uryoya.diary.controller.{AuthenticationController, DiaryController, UserController}
+import com.uryoya.diary.entity.DiaryId
 import com.uryoya.diary.entity.mysql.User
 import com.uryoya.diary.repository.mysql.UserRepository
 import com.uryoya.diary.request.{CreateUserRequest, DiaryRequest, SigninRequest, UserRequest}
 import com.uryoya.diary.response.{DiaryResponse, MessageResponse, UserResponse}
 import com.uryoya.diary.service.SessionService
 import io.circe.generic.auto._
-import io.circe.{Encoder, Decoder}
+import io.circe.{Decoder, Encoder}
 import io.finch.Endpoint
 import io.finch._
 import io.finch.circe._
@@ -142,6 +143,14 @@ class Api {
         Ok(DiaryController.diaries)
       }
 
+    val diary: Endpoint[DiaryResponse] =
+      get("api" :: "diaries" :: path[Int] :: auth) { diaryId: DiaryId =>
+        DiaryController.diary(diaryId) match {
+          case Some(resp) => Ok(resp)
+          case None => NotFound(new IllegalArgumentException(s"DiaryID: $diaryId is not found."))
+        }
+      }
+
     (
       signin
         :+: signout
@@ -153,6 +162,7 @@ class Api {
         :+: deleteUser
         :+: postDiary
         :+: diaries
+        :+: diary
     ).toServiceAs[Application.Json]
   }
 }
