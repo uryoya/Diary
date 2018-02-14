@@ -10,15 +10,18 @@ import com.uryoya.diary.controller.{AuthenticationController, DiaryController, U
 import com.uryoya.diary.entity.mysql.User
 import com.uryoya.diary.repository.mysql.UserRepository
 import com.uryoya.diary.request.{CreateUserRequest, DiaryRequest, SigninRequest, UserRequest}
-import com.uryoya.diary.response.{MessageResponse, UserResponse}
+import com.uryoya.diary.response.{DiaryResponse, MessageResponse, UserResponse}
 import com.uryoya.diary.service.SessionService
 import io.circe.generic.auto._
+import io.circe.{Encoder, Decoder}
 import io.finch.Endpoint
 import io.finch._
 import io.finch.circe._
 import shapeless.HNil
 
 class Api {
+  implicit val encodeTimestamp: Encoder[java.sql.Timestamp] =
+    Encoder.encodeString.contramap(_.toInstant.toString)
   val service: Service[Request, Response] = {
     val sessionKey = config.session.cookieName
     val cookieMaxAge = Some(Duration(config.session.maxAge, TimeUnit.SECONDS))
@@ -124,6 +127,7 @@ class Api {
           }
       }
 
+    // Diary
     val postDiary: Endpoint[MessageResponse] =
       post("api" :: "diaries" :: jsonBody[DiaryRequest] :: authWithUser) {
         (req: DiaryRequest, signinUser: User) =>
@@ -131,6 +135,11 @@ class Api {
             case Right(resp) => Ok(resp)
             case Left(e) => BadRequest(new IllegalArgumentException(e.message))
           }
+      }
+
+    val diaries: Endpoint[List[DiaryResponse]] =
+      get("api" :: "diaries" :: auth) {
+        Ok(DiaryController.diaries)
       }
 
     (
@@ -143,6 +152,7 @@ class Api {
         :+: updateUserAvatar
         :+: deleteUser
         :+: postDiary
+        :+: diaries
     ).toServiceAs[Application.Json]
   }
 }
