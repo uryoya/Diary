@@ -259,6 +259,26 @@ function getComment() {
         });
 }
 
+function updateComment() {
+    const form = new FormData(document.getElementById('update-comment-form'));
+    const comment_id = form.get('comment-id');
+    const data = {
+        body: form.get('body')
+    };
+    console.log(data);
+    fetch(`/api/comments/${comment_id}`, {
+        credentials: 'include',
+        method: 'put',
+        body: JSON.stringify(data)
+    })
+        .then(function(resp) {
+            return resp.json();
+        })
+        .then(function (user) {
+            console.log(user);
+        })
+}
+
 document.querySelector('#signin-button').addEventListener('click', signin);
 document.querySelector('#signout-button').addEventListener('click', signout);
 document.querySelector('#create-user-button').addEventListener('click', createUser);
@@ -274,3 +294,4 @@ document.querySelector('#update-diary-button').addEventListener('click', updateD
 document.querySelector('#delete-diary-button').addEventListener('click', deleteDiary);
 document.querySelector('#post-comment-button').addEventListener('click', postComment);
 document.querySelector('#get-comment-button').addEventListener('click', getComment);
+document.querySelector('#update-comment-button').addEventListener('click', updateComment);
