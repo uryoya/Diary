@@ -189,6 +189,27 @@ function getDiary() {
             console.log(user)
         });
 }
+
+function updateDiary() {
+    const form = new FormData(document.getElementById('update-diary-form'));
+    const diary_id = form.get('diary-id');
+    const data = {};
+    if (form.get('title') !== '') data['title'] = form.get('title');
+    if (form.get('body') !== '') data['body'] = form.get('body');
+    console.log(data);
+    fetch(`/api/diaries/${diary_id}`, {
+        credentials: 'include',
+        method: 'put',
+        body: JSON.stringify(data)
+    })
+        .then(function(resp) {
+            return resp.json();
+        })
+        .then(function (user) {
+            console.log(user);
+        })
+}
+
 document.querySelector('#signin-button').addEventListener('click', signin);
 document.querySelector('#signout-button').addEventListener('click', signout);
 document.querySelector('#create-user-button').addEventListener('click', createUser);
@@ -200,4 +221,5 @@ document.querySelector('#delete-user-button').addEventListener('click', deleteUs
 document.querySelector('#post-diary-button').addEventListener('click', postDiary);
 document.querySelector('#get-diaries-button').addEventListener('click', getAlldiary);
 document.querySelector('#get-diary-button').addEventListener('click', getDiary);
+document.querySelector('#update-diary-button').addEventListener('click', updateDiary);
 
