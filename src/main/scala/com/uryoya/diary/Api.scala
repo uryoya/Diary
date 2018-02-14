@@ -21,47 +21,52 @@ import io.finch.circe._
 import shapeless.HNil
 
 class Api {
+  // JSON Timestampのためのパーサ
   implicit val encodeTimestamp: Encoder[java.sql.Timestamp] =
     Encoder.encodeString.contramap(_.toInstant.toString)
+
+  // Sessionの補助
+  val sessionKey: String = config.session.cookieName
+  val cookieMaxAge = Some(Duration(config.session.maxAge, TimeUnit.SECONDS))
+  val sessionAsCookie = (session: SessionService) =>
+    new Cookie(sessionKey, session.id, maxAge = cookieMaxAge)
+  val sessionRevokeAsCookie = // Cookieは Max-Age を`0`に設定すると削除される
+    new Cookie(sessionKey, "", maxAge = Some(Duration(0, TimeUnit.SECONDS)))
+
+  // 認証の必要なエンドポイントのための補助
+  val auth: Endpoint[HNil] =
+    cookie(sessionKey).mapOutputAsync( _cookie =>
+      SessionService.getFromCookie(_cookie)
+        .map(_.fold(Unauthorized(new Exception("Unknown user.")): Output[HNil])(_ => Ok(HNil)))
+    ).handle {
+      case e: Error.NotPresent => Unauthorized(e)
+    }
+
+  val authWithUser: Endpoint[User] =
+    cookie(sessionKey).mapOutputAsync( _cookie =>
+      SessionService.getFromCookie(_cookie) map { maybeSessionService =>
+        val maybeOutput =
+          for {
+            session <- maybeSessionService
+            loginId <- session.get("login")
+            signinUser <- UserRepository.getUser(loginId)
+          } yield Ok(signinUser)
+        maybeOutput.getOrElse(Unauthorized(new Exception("Unknown user.")))
+      }
+    ).handle {
+      case e: Error.NotPresent => Unauthorized(e)
+    }
+
+  val authWithSession: Endpoint[SessionService] =
+    cookie(sessionKey).mapOutputAsync( _cookie =>
+      SessionService.getFromCookie(_cookie)
+        .map(_.fold(Unauthorized(new Exception("Unknown user.")): Output[SessionService])(Ok))
+    ).handle {
+      case e: Error.NotPresent => Unauthorized(e)
+    }
+
+  // API (service) の定義
   val service: Service[Request, Response] = {
-    val sessionKey = config.session.cookieName
-    val cookieMaxAge = Some(Duration(config.session.maxAge, TimeUnit.SECONDS))
-    val sessionAsCookie = (session: SessionService) =>
-      new Cookie(sessionKey, session.id, maxAge = cookieMaxAge)
-    val sessionRevokeAsCookie = // Cookieは Max-Age を`0`に設定すると削除される
-      new Cookie(sessionKey, "", maxAge = Some(Duration(0, TimeUnit.SECONDS)))
-
-    val auth: Endpoint[HNil] =
-      cookie(sessionKey).mapOutputAsync( _cookie =>
-        SessionService.getFromCookie(_cookie)
-          .map(_.fold(Unauthorized(new Exception("Unknown user.")): Output[HNil])(_ => Ok(HNil)))
-      ).handle {
-        case e: Error.NotPresent => Unauthorized(e)
-      }
-
-    val authWithUser: Endpoint[User] =
-      cookie(sessionKey).mapOutputAsync( _cookie =>
-        SessionService.getFromCookie(_cookie) map { maybeSessionService =>
-          val maybeOutput =
-            for {
-              session <- maybeSessionService
-              loginId <- session.get("login")
-              signinUser <- UserRepository.getUser(loginId)
-            } yield Ok(signinUser)
-          maybeOutput.getOrElse(Unauthorized(new Exception("Unknown user.")))
-        }
-      ).handle {
-        case e: Error.NotPresent => Unauthorized(e)
-      }
-
-    val authWithSession: Endpoint[SessionService] =
-      cookie(sessionKey).mapOutputAsync( _cookie =>
-        SessionService.getFromCookie(_cookie)
-          .map(_.fold(Unauthorized(new Exception("Unknown user.")): Output[SessionService])(Ok))
-      ).handle {
-        case e: Error.NotPresent => Unauthorized(e)
-      }
-
     // Authentication
     val signin: Endpoint[MessageResponse] =
       post("api" :: "signin" :: jsonBody[SigninRequest]) { req: SigninRequest =>
