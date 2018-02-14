@@ -65,4 +65,17 @@ object CommentRepository {
       .transact(MysqlTransactors.master)
       .unsafeRunSync
   }
+
+  /**
+    * コメントを削除する.
+    */
+  def deleteComment(comment: Comment): Int = {
+    sql"""
+      DELETE FROM `comments`
+      WHERE `id` = ${comment.id}
+    """
+      .update.run
+      .transact(MysqlTransactors.master)
+      .unsafeRunSync
+  }
 }
