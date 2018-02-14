@@ -7,7 +7,7 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Cookie, Request, Response}
 import com.twitter.util.Duration
 import com.uryoya.diary.controller._
-import com.uryoya.diary.entity.DiaryId
+import com.uryoya.diary.entity.{CommentId, DiaryId}
 import com.uryoya.diary.entity.mysql.User
 import com.uryoya.diary.repository.mysql.UserRepository
 import com.uryoya.diary.request._
@@ -184,6 +184,14 @@ class Api {
           }
       }
 
+    val comment: Endpoint[CommentResponse] =
+      get("api" :: "comments" :: path[Int] :: auth) { commentId: CommentId =>
+        CommentController.comment(commentId) match {
+          case Some(resp) => Ok(resp)
+          case None => NotFound(new IllegalArgumentException(s"Comment $commentId not found."))
+        }
+      }
+
     (
       signin
         :+: signout
@@ -199,6 +207,7 @@ class Api {
         :+: updateDiary
         :+: deleteDiary
         :+: postComment
+        :+: comment
     ).toServiceAs[Application.Json]
   }
 }
