@@ -6,10 +6,10 @@ import java.util.concurrent.TimeUnit
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Cookie, Request, Response}
 import com.twitter.util.Duration
-import com.uryoya.diary.controller.{AuthenticationController, UserController}
+import com.uryoya.diary.controller.{AuthenticationController, DiaryController, UserController}
 import com.uryoya.diary.entity.mysql.User
 import com.uryoya.diary.repository.mysql.UserRepository
-import com.uryoya.diary.request.{CreateUserRequest, SigninRequest, UserRequest}
+import com.uryoya.diary.request.{CreateUserRequest, DiaryRequest, SigninRequest, UserRequest}
 import com.uryoya.diary.response.{MessageResponse, UserResponse}
 import com.uryoya.diary.service.SessionService
 import io.circe.generic.auto._
@@ -124,6 +124,15 @@ class Api {
           }
       }
 
+    val postDiary: Endpoint[MessageResponse] =
+      post("api" :: "diaries" :: jsonBody[DiaryRequest] :: authWithUser) {
+        (req: DiaryRequest, signinUser: User) =>
+          DiaryController.postDiary(signinUser, req) match {
+            case Right(resp) => Ok(resp)
+            case Left(e) => BadRequest(new IllegalArgumentException(e.message))
+          }
+      }
+
     (
       signin
         :+: signout
@@ -133,6 +142,7 @@ class Api {
         :+: updateUser
         :+: updateUserAvatar
         :+: deleteUser
+        :+: postDiary
     ).toServiceAs[Application.Json]
   }
 }
