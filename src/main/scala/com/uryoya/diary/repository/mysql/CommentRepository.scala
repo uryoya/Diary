@@ -8,13 +8,17 @@ object CommentRepository {
   /**
     * Comment IDからコメントを取得する.
     */
-  def getComment(id: CommentId): Option[Comment] = {
+  def getComment(id: CommentId): Option[(Comment, AboutUser)] = {
     sql"""
-      SELECT `id`, `author_id`, `diary_id`, `body`, `create_at`, `last_update_at`
-      FROM `comments`
-      WHERE `id` = $id
+      SELECT
+        c.id, c.author_id, c.diary_id, c.body, c.create_at, c.last_update_at,
+        u.id, u.login, u.name, u.avatar_uri, u.admin
+      FROM comments as c
+      LEFT JOIN users as u
+      ON c.author_id = u.id
+      WHERE c.id = $id
     """
-      .query[Comment]
+      .query[(Comment, AboutUser)]
       .option
       .transact(MysqlTransactors.master)
       .unsafeRunSync
