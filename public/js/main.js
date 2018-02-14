@@ -225,6 +225,25 @@ function deleteDiary() {
         });
 }
 
+function postComment() {
+    const form = new FormData(document.querySelector('#post-comment-form'));
+    const data = {
+        diaryId: form.get('diary-id'),
+        body: form.get('body')
+    };
+    fetch('/api/comments', {
+        method: 'post',
+        credentials: 'include',
+        body: JSON.stringify(data)
+    })
+        .then(function(resp) {
+            return resp.json();
+        })
+        .then(function(msg) {
+            console.log(msg);
+        });
+}
+
 document.querySelector('#signin-button').addEventListener('click', signin);
 document.querySelector('#signout-button').addEventListener('click', signout);
 document.querySelector('#create-user-button').addEventListener('click', createUser);
@@ -238,4 +257,5 @@ document.querySelector('#get-diaries-button').addEventListener('click', getAlldi
 document.querySelector('#get-diary-button').addEventListener('click', getDiary);
 document.querySelector('#update-diary-button').addEventListener('click', updateDiary);
 document.querySelector('#delete-diary-button').addEventListener('click', deleteDiary);
+document.querySelector('#post-comment-button').addEventListener('click', postComment);
 
