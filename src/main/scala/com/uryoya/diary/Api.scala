@@ -202,6 +202,15 @@ class Api {
           }
       }
 
+    val deleteComment: Endpoint[MessageResponse] =
+      delete("api" :: "comments" :: path[Int] :: authWithUser) {
+        (commentId: CommentId, signinUser: User) =>
+          CommentController.deleteComment(commentId, signinUser) match {
+            case Right(resp) => Ok(resp)
+            case Left(e) => Forbidden(new AccessControlException(e.message))
+          }
+      }
+
     (
       signin
         :+: signout
@@ -219,6 +228,7 @@ class Api {
         :+: postComment
         :+: comment
         :+: updateComment
+        :+: deleteComment
     ).toServiceAs[Application.Json]
   }
 }

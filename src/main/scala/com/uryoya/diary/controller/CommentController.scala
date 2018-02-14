@@ -36,4 +36,16 @@ object CommentController {
       case None => Left(InvalidRequest(""))
     }
   }
+
+  def deleteComment(commentId: CommentId, signinUser: User): Either[InvalidRequest, MessageResponse] = {
+    val maybeDeleted = for {
+      (srcComment, author) <- CommentRepository.getComment(commentId)
+      if author.id == signinUser.id
+    } yield CommentRepository.deleteComment(srcComment)
+    maybeDeleted match {
+      case Some(1) => Right(MessageResponse("Success."))
+      case Some(_) => Left(InvalidRequest("Delete failed."))
+      case None => Left(InvalidRequest("Forbidden."))
+    }
+  }
 }
