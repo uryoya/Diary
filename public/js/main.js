@@ -279,6 +279,21 @@ function updateComment() {
         })
 }
 
+function deleteComment() {
+    const form = new FormData(document.querySelector('#delete-comment-form'));
+    const comment_id = form.get('comment-id');
+    fetch(`/api/comments/${comment_id}`, {
+        credentials: 'include',
+        method: 'delete'
+    })
+        .then(function(resp) {
+            return resp.json()
+        })
+        .then(function(comment) {
+            console.log(comment)
+        });
+}
+
 document.querySelector('#signin-button').addEventListener('click', signin);
 document.querySelector('#signout-button').addEventListener('click', signout);
 document.querySelector('#create-user-button').addEventListener('click', createUser);
@@ -295,3 +310,4 @@ document.querySelector('#delete-diary-button').addEventListener('click', deleteD
 document.querySelector('#post-comment-button').addEventListener('click', postComment);
 document.querySelector('#get-comment-button').addEventListener('click', getComment);
 document.querySelector('#update-comment-button').addEventListener('click', updateComment);
+document.querySelector('#delete-comment-button').addEventListener('click', deleteComment);
