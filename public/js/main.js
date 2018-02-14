@@ -175,6 +175,20 @@ function getAlldiary() {
         });
 }
 
+function getDiary() {
+    const form = new FormData(document.querySelector('#get-diary-form'));
+    const diary_id = form.get('diary-id');
+    fetch(`/api/diaries/${diary_id}`, {
+        credentials: 'include',
+        method: 'get'
+    })
+        .then(function(resp) {
+            return resp.json()
+        })
+        .then(function(user) {
+            console.log(user)
+        });
+}
 document.querySelector('#signin-button').addEventListener('click', signin);
 document.querySelector('#signout-button').addEventListener('click', signout);
 document.querySelector('#create-user-button').addEventListener('click', createUser);
@@ -185,4 +199,5 @@ document.querySelector('#update-user-avatar-button').addEventListener('click', u
 document.querySelector('#delete-user-button').addEventListener('click', deleteUser);
 document.querySelector('#post-diary-button').addEventListener('click', postDiary);
 document.querySelector('#get-diaries-button').addEventListener('click', getAlldiary);
+document.querySelector('#get-diary-button').addEventListener('click', getDiary);
 
