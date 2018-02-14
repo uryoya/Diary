@@ -8,13 +8,17 @@ object DiaryRepository {
   /**
     * Diary IDから日報を取得する.
     */
-  def getDiary(id: DiaryId): Option[Diary] = {
+  def getDiary(id: DiaryId): Option[(Diary, AboutUser)] = {
     sql"""
-      SELECT `id`, `author_id`, `title`, `body`, `create_at`, `last_update_at`
-      FROM `diaries`
-      WHERE `id` = $id
+      SELECT
+       d.id, d.author_id, d.title, d.body, d.create_at, d.last_update_at,
+       u.id, u.login, u.name, u.avatar_uri, u.admin
+      FROM diaries AS d
+      LEFT JOIN users as u
+      ON d.author_id = u.id
+      WHERE d.id = $id
     """
-      .query[Diary]
+      .query[(Diary, AboutUser)]
       .option
       .transact(MysqlTransactors.master)
       .unsafeRunSync
@@ -23,12 +27,16 @@ object DiaryRepository {
   /**
     * すべての日報を取得する.
     */
-  def getAllDiary: List[Diary] = {
+  def getAllDiary: List[(Diary, AboutUser)] = {
     sql"""
-      SELECT `id`, `author_id`, `title`, `body`, `create_at`, `last_update_at`
-      FROM `diaries`
+      SELECT
+       d.id, d.author_id, d.title, d.body, d.create_at, d.last_update_at,
+       u.id, u.login, u.name, u.avatar_uri, u.admin
+      FROM diaries AS d
+      LEFT JOIN users as u
+      ON d.author_id = u.id
     """
-      .query[Diary]
+      .query[(Diary, AboutUser)]
       .list
       .transact(MysqlTransactors.master)
       .unsafeRunSync
