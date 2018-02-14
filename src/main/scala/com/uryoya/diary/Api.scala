@@ -165,6 +165,15 @@ class Api {
         }
       }
 
+    val deleteDiary: Endpoint[MessageResponse] =
+      delete("api" :: "diaries" :: path[Int] :: authWithUser) {
+        (diaryId: DiaryId, signinUser: User) =>
+          DiaryController.deleteDiary(diaryId, signinUser) match {
+            case Right(resp) => Ok(resp)
+            case Left(e) => Forbidden(new AccessControlException(e.message))
+          }
+      }
+
     (
       signin
         :+: signout
@@ -178,6 +187,7 @@ class Api {
         :+: diaries
         :+: diary
         :+: updateDiary
+        :+: deleteDiary
     ).toServiceAs[Application.Json]
   }
 }

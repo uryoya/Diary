@@ -40,4 +40,16 @@ object DiaryController {
       case None => Left(InvalidRequest(""))
     }
   }
+
+  def deleteDiary(diaryId: DiaryId, signinUser: User): Either[InvalidRequest, MessageResponse] = {
+    val maybeDeleted = for {
+      (srcDiary, author) <- DiaryRepository.getDiary(diaryId)
+      if author.id == signinUser.id
+    } yield DiaryRepository.deleteDiary(srcDiary)
+    maybeDeleted match {
+      case Some(1) => Right(MessageResponse("Success."))
+      case Some(_) => Left(InvalidRequest("Delete failed."))
+      case None => Left(InvalidRequest("You are not author."))
+    }
+  }
 }
