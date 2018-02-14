@@ -88,6 +88,16 @@ function getAllUser() { fetch('/api/users', { credentials: 'include'
     });
 }
 
+function getMyself() {
+    fetch('/api/myself', {
+        method: "get",
+        credentials: 'include'
+    })
+        .then(function(resp) {
+            console.log(resp.json());
+        });
+}
+
 function updateUser() {
     const form = new FormData(document.getElementById('update-user-form'));
     const data = {};
@@ -298,6 +308,7 @@ document.querySelector('#signout-button').addEventListener('click', signout);
 document.querySelector('#create-user-button').addEventListener('click', createUser);
 document.querySelector('#get-user-button').addEventListener('click', getUser);
 document.querySelector('#get-users-button').addEventListener('click', getAllUser);
+document.querySelector('#get-myself-button').addEventListener('click', getMyself);
 document.querySelector('#update-user-button').addEventListener('click', updateUser);
 document.querySelector('#update-user-avatar-button').addEventListener('click', updateUserAvatar);
 document.querySelector('#delete-user-button').addEventListener('click', deleteUser);
