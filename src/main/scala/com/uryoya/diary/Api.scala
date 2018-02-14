@@ -6,12 +6,12 @@ import java.util.concurrent.TimeUnit
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Cookie, Request, Response}
 import com.twitter.util.Duration
-import com.uryoya.diary.controller.{AuthenticationController, DiaryController, UserController}
+import com.uryoya.diary.controller._
 import com.uryoya.diary.entity.DiaryId
 import com.uryoya.diary.entity.mysql.User
 import com.uryoya.diary.repository.mysql.UserRepository
-import com.uryoya.diary.request.{CreateUserRequest, DiaryRequest, SigninRequest, UserRequest}
-import com.uryoya.diary.response.{DiaryResponse, MessageResponse, UserResponse}
+import com.uryoya.diary.request._
+import com.uryoya.diary.response._
 import com.uryoya.diary.service.SessionService
 import io.circe.generic.auto._
 import io.circe.{Decoder, Encoder}
@@ -130,8 +130,8 @@ class Api {
 
     // Diary
     val postDiary: Endpoint[MessageResponse] =
-      post("api" :: "diaries" :: jsonBody[DiaryRequest] :: authWithUser) {
-        (req: DiaryRequest, signinUser: User) =>
+      post("api" :: "diaries" :: jsonBody[PostDiaryRequest] :: authWithUser) {
+        (req: PostDiaryRequest, signinUser: User) =>
           DiaryController.postDiary(signinUser, req) match {
             case Right(resp) => Ok(resp)
             case Left(e) => BadRequest(new IllegalArgumentException(e.message))
@@ -151,6 +151,15 @@ class Api {
         }
       }
 
+    val updateDiary: Endpoint[MessageResponse] =
+      put("api" :: "diaries" :: path[Int] :: jsonBody[DiaryRequest] :: authWithUser) {
+        (diaryId: DiaryId, dstDiaryReq: DiaryRequest, signinUser: User) =>
+        DiaryController.updateDiary(diaryId, dstDiaryReq, signinUser) match {
+          case Right(resp) => Ok(resp)
+          case Left(e) => Forbidden(new AccessControlException(e.message))
+        }
+      }
+
     (
       signin
         :+: signout
@@ -163,6 +172,7 @@ class Api {
         :+: postDiary
         :+: diaries
         :+: diary
+        :+: updateDiary
     ).toServiceAs[Application.Json]
   }
 }
