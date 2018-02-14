@@ -84,4 +84,17 @@ object DiaryRepository {
       .transact(MysqlTransactors.master)
       .unsafeRunSync
   }
+
+  /**
+    * 日報を削除する.
+    */
+  def deleteDiary(diary: Diary): Int = {
+    sql"""
+      DELETE FROM `diaries`
+      WHERE `id` = ${diary.id}
+    """
+      .update.run
+      .transact(MysqlTransactors.master)
+      .unsafeRunSync
+  }
 }
