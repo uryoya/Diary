@@ -4,8 +4,9 @@ import com.uryoya.diary.entity.InvalidRequest
 import com.uryoya.diary.entity.mysql.User
 import com.uryoya.diary.repository.mysql.UserRepository
 import com.uryoya.diary.request.{CreateUserRequest, UserRequest}
-import com.uryoya.diary.response.UserResponse
+import com.uryoya.diary.response.{MessageResponse, UserResponse}
 import com.uryoya.diary.service.{AuthenticationService, AvatarService, SessionService}
+import shapeless.HNil
 
 object UserController {
   def createUser(newUser: CreateUserRequest): Either[InvalidRequest, UserResponse] = {
@@ -56,6 +57,16 @@ object UserController {
           Right(UserResponse.fromUserEntity(newUserInfo))
         case Left(_) => Left(InvalidRequest(""))
       }
+    } else {
+      Left(InvalidRequest("Permission denied."))
+    }
+  }
+
+  def deleteUser(loginId: String, signinUser: User): Either[InvalidRequest, MessageResponse] = {
+    if (signinUser.admin || signinUser.login == loginId) {
+      UserRepository.getUser(loginId)
+        .map(UserRepository.deleteUser)
+      Right(MessageResponse("Success."))
     } else {
       Left(InvalidRequest("Permission denied."))
     }

@@ -115,6 +115,15 @@ class Api {
           }
       }
 
+    val deleteUser: Endpoint[MessageResponse] =
+      delete("api" :: "users" :: path[String] :: authWithUser) {
+        (loginId: String, signinUser: User) =>
+          UserController.deleteUser(loginId, signinUser) match {
+            case Right(resp) => Ok(resp)
+            case Left(e) => Forbidden(new AccessControlException(e.message))
+          }
+      }
+
     (
       signin
         :+: signout
@@ -123,6 +132,7 @@ class Api {
         :+: user
         :+: updateUser
         :+: updateUserAvatar
+        :+: deleteUser
     ).toServiceAs[Application.Json]
   }
 }
