@@ -31,34 +31,27 @@ object UserController {
     }
   }
 
-  def updateUser(loginId: String, user: UserRequest, signinUser: User): Either[InvalidRequest, UserResponse] = {
-    if (signinUser.admin || signinUser.login == loginId) {
-      val newUserInfo = signinUser.copy(
-        name = user.name.getOrElse(signinUser.name),
-        accessToken = user.accessToken.getOrElse(signinUser.accessToken),
-        passwordHash = user.password
-          .map(AuthenticationService.passwordHash)
-          .getOrElse(signinUser.passwordHash)
-      )
-      UserRepository.updateUser(newUserInfo)
-      Right(UserResponse.fromUserEntity(newUserInfo))
-    } else {
-      Left(InvalidRequest("Permission denied."))
-    }
+  def updateMyself(dstUserReq: UserRequest, signinUser: User): Either[InvalidRequest, MessageResponse] = {
+    val newUserInfo = signinUser.copy(
+      name = dstUserReq.name.getOrElse(signinUser.name),
+      accessToken = dstUserReq.accessToken.getOrElse(signinUser.accessToken),
+      passwordHash = dstUserReq.password
+        .map(AuthenticationService.passwordHash)
+        .getOrElse(signinUser.passwordHash)
+    )
+    if (1 == UserRepository.updateUser(newUserInfo))
+      Right(MessageResponse("Success."))
+    else
+      Left(InvalidRequest("Update failed."))
   }
 
-  def updateUserAvatar(loginId: String, image: Array[Byte], signinUser: User): Either[InvalidRequest, UserResponse] = {
-    if (signinUser.admin || signinUser.login == loginId) {
-      val avatar = new AvatarService(signinUser, image)
-      avatar.save match {
-        case Right(_) =>
-          val newUserInfo = signinUser.copy(avatarUri = avatar.serveUri)
-          UserRepository.updateUser(newUserInfo)
-          Right(UserResponse.fromUserEntity(newUserInfo))
-        case Left(_) => Left(InvalidRequest(""))
-      }
-    } else {
-      Left(InvalidRequest("Permission denied."))
+  def updateMyselfAvatar(image: Array[Byte], signinUser: User): Either[InvalidRequest, MessageResponse] = {
+    val avatar = new AvatarService(signinUser, image)
+    avatar.save match {
+      case Right(_) =>
+        UserRepository.updateUser(signinUser.copy(avatarUri = avatar.serveUri))
+        Right(MessageResponse("Success."))
+      case Left(_) => Left(InvalidRequest("Update failed."))
     }
   }
 

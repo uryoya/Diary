@@ -106,22 +106,20 @@ class Api {
           }
       }
 
-    val updateUser: Endpoint[UserResponse] =
-      put("api" :: "users" :: path[String] :: jsonBody[UserRequest] :: authWithUser) {
-        (loginId: String, userReq: UserRequest, signinUser: User) =>
-          UserController.updateUser(loginId, userReq, signinUser) match {
-            case Right(resp) => Ok(resp)
-            case Left(e) => Forbidden(new AccessControlException(e.message))
-          }
+    val updateMyself: Endpoint[MessageResponse] =
+      put("api" :: "myself" :: jsonBody[UserRequest] :: authWithUser) { (userReq: UserRequest, signinUser: User) =>
+        UserController.updateMyself(userReq, signinUser) match {
+          case Right(resp) => Ok(resp)
+          case Left(e) => InternalServerError(new Exception(e.message))
+        }
       }
 
-    val updateUserAvatar: Endpoint[UserResponse] =
-      put("api" :: "users" :: path[String] :: "avatar" :: binaryBody :: authWithUser) {
-        (loginId: String, img: Array[Byte], signinUser: User) =>
-          UserController.updateUserAvatar(loginId, img, signinUser) match {
-            case Right(resp) => Ok(resp)
-            case Left(e) => Forbidden(new AccessControlException(e.message))
-          }
+    val updateMyselfAvatar: Endpoint[MessageResponse] =
+      put("api" :: "myself" :: "avatar" :: binaryBody :: authWithUser) { (img: Array[Byte], signinUser: User) =>
+        UserController.updateMyselfAvatar(img, signinUser) match {
+          case Right(resp) => Ok(resp)
+          case Left(e) => InternalServerError(new Exception(e.message))
+        }
       }
 
     val deleteUser: Endpoint[MessageResponse] =
@@ -216,8 +214,8 @@ class Api {
         :+: createUser
         :+: users
         :+: user
-        :+: updateUser
-        :+: updateUserAvatar
+        :+: updateMyself
+        :+: updateMyselfAvatar
         :+: deleteUser
         :+: postDiary
         :+: diaries

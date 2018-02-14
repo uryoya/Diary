@@ -90,13 +90,12 @@ function getAllUser() { fetch('/api/users', { credentials: 'include'
 
 function updateUser() {
     const form = new FormData(document.getElementById('update-user-form'));
-    const login_id = form.get('login-id');
     const data = {};
     if (form.get('name') !== '') data['name'] = form.get('name');
     if (form.get('access-token') !== '') data['access-token'] = form.get('access-token');
     if (form.get('password') !== '') data['password'] = form.get('password');
     console.log(data);
-    fetch(`/api/users/${login_id}`, {
+    fetch('/api/myself', {
         credentials: 'include',
         method: 'put',
         body: JSON.stringify(data)
@@ -115,7 +114,7 @@ function updateUserAvatar() {
     const image = form.get('image');
     const header = new Headers();
     header.append("Content-Type", image.type);
-    fetch(`/api/users/${login_id}/avatar`, {
+    fetch('/api/myself/avatar', {
         credentials: 'include',
         method: 'put',
         body: image,
