@@ -126,4 +126,17 @@ object UserRepository {
       .transact(MysqlTransactors.master)
       .unsafeRunSync
   }
+
+  /**
+    * ユーザを削除する
+    */
+  def deleteUser(user: User): Int = {
+    sql"""
+      DELETE FROM `users`
+      WHERE `id` = ${user.id}
+    """
+      .update.run
+      .transact(MysqlTransactors.master)
+      .unsafeRunSync
+  }
 }
