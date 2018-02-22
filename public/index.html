@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="UTF-8">
+	<title>Title</title>
+	<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+</head>
+<body>
+<div id="account-info">login: {{ name }}</div>
+<div id="diary-list">
+	<ul>
+		<li v-for="diary in diaries">
+			<p>{{ diary.title }} {{ diary.author.name }}</p>
+		</li>
+	</ul>
+</div>
+<script src="js/main.js"></script>
+</body>
+</html>
