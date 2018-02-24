@@ -3,14 +3,15 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Title</title>
+	<link rel="stylesheet" href="css/main.css">
 	<script src="https://cdn.jsdelivr.net/npm/vue"></script>
 </head>
 <body>
-<div id="account-info">login: {{ name }}</div>
+<div v-cloak id="account-info">login: {{ name }}</div>
 <div id="diary-list">
 	<ul>
 		<li v-for="diary in diaries">
-			<p>{{ diary.title }} {{ diary.author.name }}</p>
+			<p v-cloak>{{ diary.title }} {{ diary.author.name }}</p>
 		</li>
 	</ul>
 </div>

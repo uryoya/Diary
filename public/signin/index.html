@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta lang="ja" charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Sign In / Sign Up</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.2/css/bulma.min.css">
+	<script defer src="https://use.fontawesome.com/releases/v5.0.0/js/all.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+</head>
+<body>
+<section class="section">
+	<div id="signin-form" class="container">
+		<div class="field">
+			<label class="label">Login Name</label>
+			<p class="control has-icons-left has-icons-right">
+				<input v-model="login" class="input" type="text" placeholder="Login Name">
+				<span class="icon is-small is-left">
+					<i class="fas fa-user"></i>
+				</span>
+			</p>
+		</div>
+		<div class="field">
+			<label class="label">Password</label>
+			<p class="control has-icons-left">
+				<input v-model="password" class="input" type="password" placeholder="Password">
+				<span class="icon is-small is-left">
+					<i class="fas fa-lock"></i>
+				</span>
+			</p>
+		</div>
+		<div class="field">
+			<p class="control">
+				<button v-on:click="signin" class="button is-success">
+					Login
+				</button>
+			</p>
+		</div>
+	</div>
+</section>
+<script src="../js/signin.js"></script>
+</body>
+</html>
