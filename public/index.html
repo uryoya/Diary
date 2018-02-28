@@ -1,20 +1,76 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-	<meta charset="UTF-8">
+	<meta lang="ja" charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Title</title>
 	<link rel="stylesheet" href="css/main.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.2/css/bulma.min.css">
+	<script defer src="https://use.fontawesome.com/releases/v5.0.0/js/all.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/vue"></script>
 </head>
 <body>
-<div v-cloak id="account-info">login: {{ name }}</div>
-<div id="diary-list">
-	<ul>
-		<li v-for="diary in diaries">
-			<p v-cloak>{{ diary.title }} {{ diary.author.name }}</p>
-		</li>
-	</ul>
-</div>
+	<nav class="navbar is-primary topNav">
+		<div class="container">
+			<div class="navbar-brand">
+				<a class="navbar-item" href="/">
+					<img src="img/book_open_yoko.png">
+				</a>
+			</div>
+			<div id="topNav" class="navbar-menu">
+				<div class="navbar-start">
+					<a class="navbar-item" href="/">HOME</a>
+				</div>
+				<div id="account-info" class="navbar-end">
+					<div class="navbar-item">
+						<div class="field is-grouped">
+							<p class="control">
+								<a><img v-bind:src="myself.avatarUri"></a>
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</nav>
+	<section class="container">
+		<div class="columns">
+			<div class="column is-3">
+				<a class="button is-primary is-large" href="#">New Post</a>
+				<aside class="menu">
+					<ul class="menu-list">
+						<li><a>Notification</a></li>
+						<li><a>Settings</a></li>
+						<li><a>Users</a></li>
+					</ul>
+				</aside>
+			</div>
+			<div class="column is-9">
+				<div id="diary-list" class="box content">
+					<article class="post" v-for="diary in diaries">
+						<h4 v-cloak>{{ diary.title }}</h4>
+						<div class="media">
+							<div class="media-left">
+								<p class="image is-32x32">
+									<img v-bind:src="diary.author.avatarUri">
+								</p>
+							</div>
+							<div class="media-content">
+								<div class="content">
+									<p>
+										<a v-cloak>@{{ diary.author.login }}</a>
+									</p>
+								</div>
+							</div>
+							<div class="media-right">
+								<span class="has-text-gray-light"><i class="fa fa-comments"></i>{{ diary.comments.length }}</span>
+							</div>
+						</div>
+					</article>
+				</div>
+			</div>
+		</div>
+	</section>
 <script src="js/main.js"></script>
 </body>
 </html>

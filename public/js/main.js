@@ -11,7 +11,7 @@ fetch('/api/myself', {
     new Vue({
         el: '#account-info',
         data: {
-            name: myself.name,
+            myself: myself,
         },
     });
 
@@ -38,5 +38,5 @@ fetch('/api/myself', {
     window.diaries = diaries;
 }).catch(function (err) {
     console.log(err);
-    window.location.href = '/Diary/public/test.html';
+    window.location.href = '/Diary/public/signin/';
 });
